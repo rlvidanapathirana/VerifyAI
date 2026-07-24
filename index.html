@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VerifyAI — Plagiarism & AI Content Detector</title>
+  <meta name="description" content="VerifyAI is a world-class, free plagiarism checker and AI content detector. Supports single & bulk document analysis, PDF/DOCX upload, and full report export. 100% client-side — no data leaves your browser." />
+  <meta name="keywords" content="plagiarism checker, AI detector, document similarity, TF-IDF, NLP, free plagiarism tool" />
+  <meta name="author" content="V.P.R. Lakshan Vidanapathirana" />
+  <meta property="og:title" content="VerifyAI — Plagiarism & AI Content Detector" />
+  <meta property="og:description" content="Free, open-source plagiarism & AI writing detector. Bulk document analysis, PDF reports, 100% client-side." />
+  <meta property="og:type" content="website" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- Phosphor Icons -->
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1/src/index.js" defer></script>
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>if(typeof pdfjsLib!=='undefined'){pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';}</script>
+  <!-- Mammoth.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <!-- html2pdf.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+  
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay">
+  <div class="loading-content">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Checking, please wait...</div>
+    <div class="loading-subtext">Running multi-algorithmic analysis and querying internet sources</div>
+    
+    <!-- Progress Tracking -->
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div id="loading-progress-fill" class="progress-fill" style="width: 0%;"></div>
+      </div>
+      <div id="loading-progress-text" class="progress-pct">0.00%</div>
+    </div>
+    
+    <button id="cancel-analysis" class="btn btn-sm btn-ghost" style="margin-top: 20px; color: #ef4444; border-color: #ef4444;">Cancel Analysis</button>
+  </div>
+</div>
+
+<!-- Particle Background -->
+<canvas id="particle-canvas" aria-hidden="true"></canvas>
+
+<!-- Toast Container -->
+<div id="toast-container" aria-live="polite" aria-label="Notifications"></div>
+
+<!-- ════════════════ NAVIGATION ════════════════ -->
+<nav class="navbar" role="navigation" aria-label="Main navigation">
+  <div class="nav-inner">
+    <a href="#hero" class="nav-logo" aria-label="VerifyAI Home">
+      <div class="nav-logo-icon" aria-hidden="true">🔍</div>
+      VerifyAI
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#tool-section">Try It</a></li>
+      <li><a href="#tool-section" class="nav-cta btn btn-sm btn-primary">Start Checking</a></li>
+    </ul>
+    <button class="mobile-menu-btn" id="mobile-menu-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
+      <i class="ph ph-list"></i>
+    </button>
+  </div>
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" role="menu">
+    <ul>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#tool-section">Try It</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ════════════════ HERO ════════════════ -->
+<section id="hero" class="hero">
+  <div class="hero-bg-glow" aria-hidden="true"></div>
+  <div class="container">
+    <div class="hero-badge" aria-label="Open Source tool">
+      <span class="hero-badge-dot" aria-hidden="true"></span>
+      100% Free &amp; Open Source · No Sign-up Required
+    </div>
+
+    <h1 class="hero-title">
+      <span class="hero-word" style="animation-delay:0s">The World's</span>
+      <span class="hero-word" style="animation-delay:0.08s"> Most</span>
+      <span class="hero-word" style="animation-delay:0.16s"> Advanced</span>
+      <br/>
+      <span class="gradient-text hero-word" style="animation-delay:0.24s">Plagiarism</span>
+      <span class="hero-word" style="animation-delay:0.32s"> &amp; </span>
+      <span class="gradient-text hero-word" style="animation-delay:0.40s">AI Detector</span>
+    </h1>
+
+    <p class="hero-subtitle">
+      Multi-algorithm analysis engine combining TF-IDF, N-gram Jaccard, Rabin-Karp Fingerprinting,
+      LCS, and AI content detection. Bulk documents, full reports, PDF export — all in your browser.
+    </p>
+
+    <div class="hero-buttons">
+      <a href="#tool-section" class="btn btn-primary btn-lg" onclick="app?.switchTab('single')">
+        <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+        Check Plagiarism
+      </a>
+      <a href="#tool-section" class="btn btn-secondary btn-lg" onclick="app?.switchTab('ai')">
+        <i class="ph ph-robot" aria-hidden="true"></i>
+        Detect AI Writing
+      </a>
+      <a href="#tool-section" class="btn btn-ghost btn-lg" onclick="app?.switchTab('bulk')">
+        <i class="ph ph-files" aria-hidden="true"></i>
+        Bulk Analysis
+      </a>
+    </div>
+
+    <div class="hero-stats" role="list" aria-label="Key statistics">
+      <div class="hero-stat" role="listitem">
+        <span class="hero-stat-num">5+</span>
+        <span class="hero-stat-label">Algorithms</span>
+      </div>
+      <div class="hero-stat" role="listitem">
+        <span class="hero-stat-num">20</span>
+        <span class="hero-stat-label">Max Bulk Docs</span>
+      </div>
+      <div class="hero-stat" role="listitem">
+        <span class="hero-stat-num">0%</span>
+        <span class="hero-stat-label">Data Uploaded</span>
+      </div>
+      <div class="hero-stat" role="listitem">
+        <span class="hero-stat-num">PDF</span>
+        <span class="hero-stat-label">Export Ready</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════ FEATURES ════════════════ -->
+<section id="features" class="features-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Features</div>
+      <h2 class="section-title">Everything You Need to <span class="gradient-text">Detect &amp; Verify</span></h2>
+      <p class="section-desc">Built with the same algorithms used by leading academic and enterprise tools — completely free and open source.</p>
+    </div>
+
+    <div class="features-grid" role="list">
+      <div class="feature-card" role="listitem">
+        <div class="feature-icon" style="background: var(--primary-dim)">🧮</div>
+        <h3 class="feature-title">5-Algorithm Analysis</h3>
+        <p class="feature-desc">TF-IDF Cosine Similarity, Bigram &amp; Trigram Jaccard, Rabin-Karp Fingerprinting, and Longest Common Subsequence — combined into a single weighted score.</p>
+      </div>
+      <div class="feature-card" role="listitem">
+        <div class="feature-icon" style="background: var(--warning-dim)">🤖</div>
+        <h3 class="feature-title">AI Writing Detection</h3>
+        <p class="feature-desc">Detect ChatGPT, Claude, Gemini and other AI-written text using perplexity, burstiness, lexical diversity, transition word density, and 9 statistical signals.</p>
+      </div>
+      <div class="feature-card" role="listitem">
+        <div class="feature-icon" style="background: var(--accent-dim)">📚</div>
+        <h3 class="feature-title">Bulk Document Check</h3>
+        <p class="feature-desc">Upload up to 20 documents at once. Get a full cross-document similarity matrix heatmap to instantly spot duplicate or near-duplicate pairs.</p>
+      </div>
+      <div class="feature-card" role="listitem">
+        <div class="feature-icon" style="background: var(--success-dim)">📄</div>
+        <h3 class="feature-title">PDF, DOCX, TXT Support</h3>
+        <p class="feature-desc">Upload .pdf, .docx, .txt, .md, .csv files directly. Powered by PDF.js and Mammoth.js — no server required, no data leaves your browser.</p>
+      </div>
+      <div class="feature-card" role="listitem">
+        <div class="feature-icon" style="background: var(--danger-dim)">📊</div>
+        <h3 class="feature-title">Full Export Reports</h3>
+        <p class="feature-desc">Download complete analysis as a formatted PDF report, structured CSV spreadsheet, or raw JSON data. Perfect for academic submission or team review.</p>
+      </div>
+      <div class="feature-card" role="listitem">
+        <div class="feature-icon" style="background: var(--primary-dim)">🔐</div>
+        <h3 class="feature-title">100% Private &amp; Offline-Ready</h3>
+        <p class="feature-desc">All processing happens in your browser using Web APIs. Your documents never leave your device. No account, no API key, no tracking.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════════════════ HOW IT WORKS ════════════════ -->
+<section id="how-it-works" class="how-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Process</div>
+      <h2 class="section-title">How <span class="gradient-text">VerifyAI</span> Works</h2>
+    </div>
+    <div class="steps-row">
+      <div class="step-card">
+        <div class="step-num" aria-hidden="true">1</div>
+        <h3 class="step-title">Upload or Paste</h3>
+        <p class="step-desc">Paste your text or drag-and-drop a .pdf, .docx, or .txt file directly into the tool.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num" aria-hidden="true">2</div>
+        <h3 class="step-title">Multi-Algorithm Scan</h3>
+        <p class="step-desc">5 NLP algorithms run simultaneously — TF-IDF, N-grams, Fingerprinting, LCS, and AI heuristics.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num" aria-hidden="true">3</div>
+        <h3 class="step-title">See Full Results</h3>
+        <p class="step-desc">View plagiarism %, AI content score, sentence-level matches, matched phrases, and signal breakdown.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num" aria-hidden="true">4</div>
+        <h3 class="step-title">Export Your Report</h3>
+        <p class="step-desc">Download a full PDF report, CSV data, or JSON — ready for submission or team sharing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════════════════ PRICING ════════════════ -->
+<section id="pricing" class="pricing-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-tag">Pricing</div>
+      <h2 class="section-title">Simple, <span class="gradient-text">Transparent</span> Pricing</h2>
+      <p class="section-desc">Start free. Upgrade when you need more power. No hidden fees, no credit card required to start.</p>
+    </div>
+
+    <div class="pricing-grid" role="list">
+      <!-- Free -->
+      <div class="pricing-card" role="listitem">
+        <div class="pricing-card-header">
+          <div class="plan-icon">🆓</div>
+          <div class="plan-name">Free</div>
+          <div class="plan-price"><span class="price-num">$0</span><span class="price-period">/forever</span></div>
+          <p class="plan-tagline">Perfect for students &amp; casual users</p>
+        </div>
+        <ul class="plan-features" aria-label="Free plan features">
+          <li><span class="feat-check">✓</span> Single document analysis</li>
+          <li><span class="feat-check">✓</span> AI content detection</li>
+          <li><span class="feat-check">✓</span> Unlimited bulk scan</li>
+          <li><span class="feat-check">✓</span> PDF, CSV, JSON export</li>
+          <li><span class="feat-check">✓</span> 5 algorithms (TF-IDF, LCS, etc.)</li>
+          <li><span class="feat-dim">✗</span> Turnitin-style report view</li>
+          <li><span class="feat-dim">✗</span> Source breakdown analysis</li>
+          <li><span class="feat-dim">✗</span> Inline sentence highlights</li>
+          <li><span class="feat-dim">✗</span> Priority support</li>
+        </ul>
+        <a href="#tool-section" class="btn btn-ghost btn-full">Get Started Free</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="pricing-card pricing-card-featured" role="listitem">
+        <div class="plan-badge">Most Popular</div>
+        <div class="pricing-card-header">
+          <div class="plan-icon">⚡</div>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price"><span class="price-num">$9</span><span class="price-period">/month</span></div>
+          <p class="plan-tagline">For academics, researchers &amp; writers</p>
+        </div>
+        <ul class="plan-features" aria-label="Pro plan features">
+          <li><span class="feat-check">✓</span> Everything in Free</li>
+          <li><span class="feat-check feat-gold">✓</span> <strong>Turnitin-style Originality Report</strong></li>
+          <li><span class="feat-check feat-gold">✓</span> <strong>Inline source highlighting</strong></li>
+          <li><span class="feat-check feat-gold">✓</span> <strong>Source breakdown (Internet / Publications)</strong></li>
+          <li><span class="feat-check feat-gold">✓</span> Unlimited bulk scan</li>
+          <li><span class="feat-check feat-gold">✓</span> Premium PDF report (Turnitin format)</li>
+          <li><span class="feat-check feat-gold">✓</span> Submission ID &amp; timestamp tracking</li>
+          <li><span class="feat-check feat-gold">✓</span> Priority email support</li>
+        </ul>
+        <a href="#tool-section" class="btn btn-primary btn-full">Start Pro Trial</a>
+      </div>
+
+      <!-- Institution -->
+      <div class="pricing-card" role="listitem">
+        <div class="pricing-card-header">
+          <div class="plan-icon">🏛️</div>
+          <div class="plan-name">Institution</div>
+          <div class="plan-price"><span class="price-num">Custom</span></div>
+          <p class="plan-tagline">For universities &amp; enterprise teams</p>
+        </div>
+        <ul class="plan-features" aria-label="Institution plan features">
+          <li><span class="feat-check">✓</span> Everything in Pro</li>
+          <li><span class="feat-check feat-cyan">✓</span> Unlimited documents</li>
+          <li><span class="feat-check feat-cyan">✓</span> Multi-user dashboard</li>
+          <li><span class="feat-check feat-cyan">✓</span> LMS integration (Moodle, Canvas)</li>
+          <li><span class="feat-check feat-cyan">✓</span> White-label reports</li>
+          <li><span class="feat-check feat-cyan">✓</span> API access</li>
+          <li><span class="feat-check feat-cyan">✓</span> Dedicated account manager</li>
+          <li><span class="feat-check feat-cyan">✓</span> SLA &amp; compliance support</li>
+        </ul>
+        <a href="mailto:contact@verifyai.app" class="btn btn-ghost btn-full">Contact Sales</a>
+      </div>
+    </div>
+
+    <!-- Trust Bar -->
+    <div class="pricing-trust">
+      <span>🔒 No credit card required</span>
+      <span>🔄 Cancel anytime</span>
+      <span>🔐 100% private &amp; secure</span>
+      <span>⚡ Instant access</span>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ════════════════ TOOL SECTION ════════════════ -->
+<section id="tool-section">
+  <div class="container" style="position: relative;">
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" aria-hidden="true">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Checking, please wait...</div>
+      <div class="loading-subtext">Running multi-algorithmic analysis and querying internet sources</div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-tag">Analyzer</div>
+      <h2 class="section-title">Start Your <span class="gradient-text">Analysis</span></h2>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tab-header" role="tablist" aria-label="Analysis type">
+      <button class="tab-btn active" data-tab="single" role="tab" aria-selected="true" aria-controls="panel-single" id="tab-single">
+        <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+        Single Document
+      </button>
+      <button class="tab-btn" data-tab="bulk" role="tab" aria-selected="false" aria-controls="panel-bulk" id="tab-bulk">
+        <i class="ph ph-files" aria-hidden="true"></i>
+        Bulk Check
+      </button>
+      <button class="tab-btn" data-tab="ai" role="tab" aria-selected="false" aria-controls="panel-ai" id="tab-ai">
+        <i class="ph ph-robot" aria-hidden="true"></i>
+        AI Detector
+      </button>
+    </div>
+
+    <!-- ── Single Document Panel ── -->
+    <div data-panel="single" class="active" role="tabpanel" aria-labelledby="tab-single" id="panel-single">
+      <div class="panel-grid">
+        <!-- Left: Document Input -->
+        <div>
+          <label class="panel-label" for="single-text-area">
+            <i class="ph ph-file-text" aria-hidden="true"></i> Your Document
+          </label>
+
+          <!-- Drop Zone -->
+          <div class="drop-zone" id="single-drop-zone" role="button" tabindex="0" aria-label="Upload file or click to browse">
+            <input type="file" id="single-file-input" accept=".txt,.pdf,.docx,.doc,.md,.csv" style="display:none" aria-label="Choose file to upload" />
+            <span class="drop-icon" aria-hidden="true">📎</span>
+            <div class="drop-label">Drag &amp; drop or click to upload</div>
+            <div class="drop-types">.pdf · .docx · .txt · .md · .csv (max 10 MB)</div>
+          </div>
+
+          <div style="margin: 12px 0; text-align:center; color: var(--text-muted); font-size:0.82rem">— or paste text below —</div>
+
+          <div class="textarea-wrapper">
+            <textarea
+              id="single-text-area"
+              class="panel-textarea"
+              placeholder="Paste your document text here... (minimum 50 characters for analysis)"
+              rows="10"
+              aria-label="Document text to analyze"
+            ></textarea>
+            <span class="char-counter" id="single-char-count" aria-live="polite">0 characters</span>
+          </div>
+        </div>
+
+        <!-- Right: Reference Text -->
+        <div>
+          <label class="panel-label" for="reference-text-area">
+            <i class="ph ph-book-open" aria-hidden="true"></i> Reference Text
+            <span style="color:var(--text-muted); font-weight:400; text-transform:none; font-size:0.78rem; margin-left:6px">(optional — for plagiarism comparison)</span>
+          </label>
+
+          <div style="margin-bottom: 12px; color: var(--text-muted); font-size: 0.82rem; background: var(--accent-dim); border: 1px solid rgba(34,211,238,0.15); border-radius: var(--radius-sm); padding: 10px 14px; line-height: 1.6;">
+            <i class="ph ph-info" aria-hidden="true"></i>
+            Paste a reference document, essay, article, or any text to compare against. Leave empty to run AI detection &amp; stats only.
+          </div>
+
+          <div class="textarea-wrapper">
+            <textarea
+              id="reference-text-area"
+              class="panel-textarea"
+              placeholder="Paste reference text here to compare against your document... (e.g. source material, previous submission, known text)"
+              rows="14"
+              aria-label="Reference text for comparison"
+            ></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress Bar -->
+      <div id="single-progress" class="progress-bar-wrap" style="display:none" role="progressbar" aria-label="Analysis progress">
+        <div class="progress-fill"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="single-clear-btn" aria-label="Clear all text fields">
+          <i class="ph ph-trash" aria-hidden="true"></i> Clear
+        </button>
+        <button class="btn btn-primary" id="single-analyze-btn" aria-label="Run plagiarism and AI analysis">
+          <i class="ph ph-magnifying-glass" aria-hidden="true"></i> Analyze Document
+        </button>
+      </div>
+
+      <!-- Results -->
+      <div id="single-results" aria-live="polite" aria-label="Analysis results"></div>
+    </div>
+
+    <!-- ── Bulk Check Panel ── -->
+    <div data-panel="bulk" role="tabpanel" aria-labelledby="tab-bulk" id="panel-bulk">
+      <div class="glass-card" style="margin-bottom: 20px;">
+        <label class="panel-label">
+          <i class="ph ph-upload-simple" aria-hidden="true"></i> Upload Documents (2–20 files)
+        </label>
+
+        <div class="drop-zone" id="bulk-drop-zone" role="button" tabindex="0" aria-label="Upload multiple files or click to browse">
+          <input type="file" id="bulk-file-input" accept=".txt,.pdf,.docx,.doc,.md,.csv" multiple style="display:none" aria-label="Choose multiple files" />
+          <span class="drop-icon" aria-hidden="true">📂</span>
+          <div class="drop-label">Drag &amp; drop multiple files or click to browse</div>
+          <div class="drop-types">.pdf · .docx · .txt · .md · .csv — up to 20 documents, 10 MB each</div>
+        </div>
+
+        <div class="bulk-count-row">
+          <span id="bulk-file-count" aria-live="polite">0 documents loaded</span>
+          <button class="btn btn-sm btn-ghost" id="bulk-clear-btn" aria-label="Remove all uploaded files">
+            <i class="ph ph-trash" aria-hidden="true"></i> Clear All
+          </button>
+        </div>
+
+        <div id="bulk-file-list" role="list" aria-label="Uploaded files"></div>
+      </div>
+
+      <!-- Progress -->
+      <div id="bulk-progress" class="progress-bar-wrap" style="display:none" role="progressbar" aria-label="Bulk analysis progress">
+        <div class="progress-fill"></div>
+      </div>
+
+      <div class="panel-actions">
+        <button class="btn btn-primary" id="bulk-analyze-btn" disabled aria-label="Run bulk similarity analysis">
+          <i class="ph ph-chart-bar" aria-hidden="true"></i> Analyze All Documents
+        </button>
+      </div>
+
+      <!-- Bulk Results -->
+      <div id="bulk-results" aria-live="polite" aria-label="Bulk analysis results"></div>
+    </div>
+
+    <!-- ── AI Detector Panel ── -->
+    <div data-panel="ai" role="tabpanel" aria-labelledby="tab-ai" id="panel-ai">
+      <div class="glass-card" style="margin-bottom: 20px; background: linear-gradient(135deg, rgba(245,158,11,0.05), rgba(99,102,241,0.05)); border-color: rgba(245,158,11,0.15);">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+          <span style="font-size:1.5rem">🤖</span>
+          <div>
+            <div style="font-weight:700; font-size:1rem">AI Writing Detector</div>
+            <div style="font-size:0.82rem; color:var(--text-muted)">Detects ChatGPT, Claude, Gemini, and other AI-generated content using 9 statistical signals</div>
+          </div>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:4px;">
+          <span style="padding:3px 10px; background:var(--warning-dim); border:1px solid rgba(245,158,11,0.2); border-radius:100px; font-size:0.75rem; color:var(--warning);">📊 Perplexity Analysis</span>
+          <span style="padding:3px 10px; background:var(--primary-dim); border:1px solid rgba(99,102,241,0.2); border-radius:100px; font-size:0.75rem; color:var(--primary);">📈 Burstiness Score</span>
+          <span style="padding:3px 10px; background:var(--accent-dim); border:1px solid rgba(34,211,238,0.2); border-radius:100px; font-size:0.75rem; color:var(--accent);">💬 Phrase Detection</span>
+          <span style="padding:3px 10px; background:var(--success-dim); border:1px solid rgba(16,185,129,0.2); border-radius:100px; font-size:0.75rem; color:var(--success);">🔤 Lexical Diversity</span>
+          <span style="padding:3px 10px; background:var(--danger-dim); border:1px solid rgba(239,68,68,0.2); border-radius:100px; font-size:0.75rem; color:var(--danger);">🔁 Structural Patterns</span>
+        </div>
+      </div>
+
+      <!-- Upload for AI tab -->
+      <div class="drop-zone" id="ai-drop-zone" style="margin-bottom:12px" role="button" tabindex="0" aria-label="Upload file for AI detection">
+        <input type="file" id="ai-file-input" accept=".txt,.pdf,.docx,.doc,.md" style="display:none" aria-label="Choose file for AI detection" />
+        <span class="drop-icon" aria-hidden="true">📎</span>
+        <div class="drop-label">Upload file or paste text below</div>
+        <div class="drop-types">.pdf · .docx · .txt · .md</div>
+      </div>
+
+      <div style="text-align:center; color:var(--text-muted); font-size:0.82rem; margin: 8px 0">— or paste text below —</div>
+
+      <div class="textarea-wrapper" style="margin-bottom:16px">
+        <textarea
+          id="ai-text-area"
+          class="panel-textarea"
+          placeholder="Paste the text you want to check for AI generation... Works best with 100+ words. Paste essays, articles, reports, or any text you suspect might be AI-written."
+          rows="12"
+          aria-label="Text to check for AI content"
+        ></textarea>
+        <span class="char-counter" id="ai-char-count" aria-live="polite">0 characters</span>
+      </div>
+
+      <!-- Progress -->
+      <div id="ai-progress" class="progress-bar-wrap" style="display:none" role="progressbar" aria-label="AI detection progress">
+        <div class="progress-fill"></div>
+      </div>
+
+      <div class="panel-actions">
+        <button class="btn btn-ghost" id="ai-clear-btn" aria-label="Clear text">
+          <i class="ph ph-trash" aria-hidden="true"></i> Clear
+        </button>
+        <button class="btn btn-accent" id="ai-analyze-btn" aria-label="Run AI content detection">
+          <i class="ph ph-robot" aria-hidden="true"></i> Detect AI Content
+        </button>
+      </div>
+
+      <!-- AI Results -->
+      <div id="ai-results" aria-live="polite" aria-label="AI detection results"></div>
+    </div>
+
+  </div><!-- /container -->
+</section>
+
+<!-- ════════════════ REPORT MODAL ════════════════ -->
+<div id="report-modal" class="report-modal" role="dialog" aria-modal="true" aria-label="Originality Report" style="display:none">
+  <div class="report-modal-backdrop" id="report-modal-backdrop"></div>
+  <div class="report-modal-inner">
+    <!-- Modal Header Bar -->
+    <div class="report-modal-topbar">
+      <div class="report-modal-brand">
+        <span class="rmt-logo-dot" aria-hidden="true"></span>
+        <span>VerifyAI Originality Report</span>
+      </div>
+      <div class="report-modal-actions">
+        <button class="btn btn-sm btn-ghost" id="report-print-btn" aria-label="Print report">
+          <i class="ph ph-printer" aria-hidden="true"></i> Print
+        </button>
+        <button class="btn btn-sm btn-primary" id="report-pdf-btn" aria-label="Export PDF">
+          <i class="ph ph-file-pdf" aria-hidden="true"></i> Export PDF
+        </button>
+        <button class="btn btn-sm btn-ghost" id="report-close-btn" aria-label="Close report">
+          <i class="ph ph-x" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Modal Content -->
+    <div class="report-modal-content" id="report-modal-content">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ FOOTER ════════════════ -->
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <!-- Brand -->
+      <div class="footer-brand">
+        <h3>🔍 VerifyAI</h3>
+        <p>The world's most advanced open-source plagiarism checker and AI content detector. 100% client-side — your documents never leave your browser.</p>
+        <br/>
+        <div class="footer-tech-badges" aria-label="Technologies used">
+          <span class="tech-badge">TF-IDF</span>
+          <span class="tech-badge">Cosine Similarity</span>
+          <span class="tech-badge">N-gram Jaccard</span>
+          <span class="tech-badge">Rabin-Karp</span>
+          <span class="tech-badge">Winnowing</span>
+          <span class="tech-badge">LCS</span>
+          <span class="tech-badge">PDF.js</span>
+          <span class="tech-badge">Mammoth.js</span>
+          <span class="tech-badge">jsPDF</span>
+        </div>
+      </div>
+
+      <!-- Features Links -->
+      <div class="footer-col">
+        <h4>Features</h4>
+        <ul>
+          <li><a href="#tool-section" onclick="app?.switchTab('single')">Single Check</a></li>
+          <li><a href="#tool-section" onclick="app?.switchTab('bulk')">Bulk Analysis</a></li>
+          <li><a href="#tool-section" onclick="app?.switchTab('ai')">AI Detector</a></li>
+          <li><a href="#pricing">Pricing Plans</a></li>
+          <li><a href="#features">PDF Export</a></li>
+          <li><a href="#features">CSV / JSON Export</a></li>
+        </ul>
+      </div>
+
+      <!-- Algorithms -->
+      <div class="footer-col">
+        <h4>Algorithms</h4>
+        <ul>
+          <li><a href="#features">TF-IDF Cosine</a></li>
+          <li><a href="#features">N-gram Jaccard</a></li>
+          <li><a href="#features">Rabin-Karp Hash</a></li>
+          <li><a href="#features">Winnowing</a></li>
+          <li><a href="#features">LCS Matching</a></li>
+        </ul>
+      </div>
+
+      <!-- Formats -->
+      <div class="footer-col">
+        <h4>Supported Formats</h4>
+        <ul>
+          <li><a href="#tool-section">PDF Documents</a></li>
+          <li><a href="#tool-section">Word (.docx)</a></li>
+          <li><a href="#tool-section">Plain Text (.txt)</a></li>
+          <li><a href="#tool-section">Markdown (.md)</a></li>
+          <li><a href="#tool-section">CSV Files</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="footer-bottom">
+      <div>
+        Developed by
+        <a href="https://lakshan.netlify.app/" target="_blank" rel="noopener noreferrer" class="footer-dev-link" aria-label="Visit Lakshan's portfolio">
+          V.P.R. Lakshan Vidanapathirana
+        </a>
+      </div>
+      <div>
+        &copy; <span id="footer-year">2026</span> VerifyAI &mdash; All Rights Reserved.
+        Open Source &amp; Free to Use.
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ════════════════ SCRIPTS ════════════════ -->
+<script src="engine/nlp-engine.js"></script>
+<script src="engine/fingerprint.js"></script>
+<script src="engine/lcs.js"></script>
+<script src="engine/ai-detector.js"></script>
+<script src="engine/file-parser.js"></script>
+<script src="ui/export.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
