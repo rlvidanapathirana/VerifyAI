@@ -101,6 +101,8 @@ class ExportManager {
         tempContainer = document.createElement('div');
         if (reportData.type === 'bulk' && window.app.renderBulkPDFTemplate) {
           tempContainer.innerHTML = window.app.renderBulkPDFTemplate(reportData);
+        } else if (reportData.type === 'ai' && window.app.renderAIPDFTemplate) {
+          tempContainer.innerHTML = window.app.renderAIPDFTemplate(reportData);
         } else if (window.app.renderTurnitinModal) {
           tempContainer.innerHTML = window.app.renderTurnitinModal(reportData);
         } else {
