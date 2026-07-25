@@ -109,7 +109,7 @@ class ExportManager {
 
     // Build an off-screen container — always use template methods
     const container = document.createElement('div');
-    container.style.cssText = 'position:fixed;left:0;top:0;width:794px;background:#ffffff;z-index:-9999;opacity:0;';
+    container.style.cssText = 'position:absolute;left:0;top:0;width:794px;background:#ffffff;z-index:-9999;';
     document.body.appendChild(container);
 
     try {
