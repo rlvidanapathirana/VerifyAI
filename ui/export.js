@@ -107,12 +107,15 @@ class ExportManager {
       return;
     }
 
-    // Build an off-screen container — always use template methods
-    const container = document.createElement('div');
-    container.style.cssText = 'position:absolute;left:0;top:0;width:794px;background:#ffffff;z-index:-9999;';
-    document.body.appendChild(container);
+    // Try to find the active modal's originality report element
+    let element = document.querySelector('.orig-report');
+    let tempContainer = null;
 
-    try {
+    if (!element) {
+      // Build a temporary container inside normal flow, hidden under loading overlay
+      tempContainer = document.createElement('div');
+      tempContainer.style.cssText = 'position:relative;width:794px;background:#ffffff;margin:0 auto;padding:0;';
+      
       let html = '';
       if (reportData.type === 'bulk') {
         html = window.app.renderBulkPDFTemplate(reportData);
@@ -121,39 +124,62 @@ class ExportManager {
       } else {
         html = window.app.renderTurnitinModal(reportData);
       }
-      container.innerHTML = html;
+      tempContainer.innerHTML = html;
+      document.body.appendChild(tempContainer);
+      element = tempContainer.firstElementChild || tempContainer;
+    }
 
-      // Wait for layout reflow
-      await new Promise(r => setTimeout(r, 400));
+    // Ensure the element doesn't have overflow/height restrictions for PDF rendering
+    const originalStyles = {
+      maxHeight: element.style.maxHeight,
+      overflow: element.style.overflow,
+      height: element.style.height
+    };
+    element.style.maxHeight = 'none';
+    element.style.overflow = 'visible';
+    element.style.height = 'auto';
 
-      const element = container.firstElementChild || container;
-      element.style.maxHeight = 'none';
-      element.style.overflow  = 'visible';
-      element.style.height    = 'auto';
+    // Wait for layout reflow
+    await new Promise(r => setTimeout(r, 450));
 
-      const opt = {
-        margin:      [12, 12, 12, 12],
-        filename:    `${filename}.pdf`,
-        image:       { type: 'jpeg', quality: 0.95 },
-        html2canvas: {
-          scale:       2,
-          useCORS:     true,
-          logging:     false,
-          width:       794,
-          windowWidth: 794,
-          scrollX:     0,
-          scrollY:     0
-        },
-        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak:   { mode: 'css', before: '.pdf-page-break', avoid: '.no-break' }
-      };
+    // Save scroll position to prevent html2canvas offset bugs
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
+    window.scrollTo(0, 0);
 
+    const opt = {
+      margin:      [12, 12, 12, 12],
+      filename:    `${filename}.pdf`,
+      image:       { type: 'jpeg', quality: 0.95 },
+      html2canvas: {
+        scale:       2,
+        useCORS:     true,
+        logging:     false,
+        windowWidth: 794,
+        scrollX:     0,
+        scrollY:     0
+      },
+      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak:   { mode: 'css', before: '.pdf-page-break', avoid: '.no-break' }
+    };
+
+    try {
       await html2pdf().set(opt).from(element).save();
     } catch (e) {
       console.error('PDF generation failed', e);
       alert('Failed to generate PDF: ' + e.message);
     } finally {
-      if (container.parentNode) document.body.removeChild(container);
+      // Restore scroll position
+      window.scrollTo(scrollX, scrollY);
+      
+      if (tempContainer) {
+        document.body.removeChild(tempContainer);
+      } else {
+        // Restore original styles
+        element.style.maxHeight = originalStyles.maxHeight;
+        element.style.overflow = originalStyles.overflow;
+        element.style.height = originalStyles.height;
+      }
       if (overlay) overlay.classList.remove('active');
     }
   }

@@ -1039,7 +1039,7 @@ class VerifyAI {
     const submId   = `${Math.floor(Math.random() * 9000000000) + 1000000000}`;
 
     return `
-    <div class="bulk-pdf-report" style="padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff;">
+    <div class="bulk-pdf-report orig-report" style="padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff;">
       
       <!-- HEADER -->
       <div style="padding: 28px 40px 20px; border-bottom: 4px solid #4f46e5; display: flex; justify-content: space-between; align-items: flex-end;">
@@ -1583,7 +1583,7 @@ class VerifyAI {
       : this.escapeHtml(textInput);
 
     return `
-    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff; width: 100%; box-sizing: border-box;">
+    <div class="orig-report" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff; width: 100%; box-sizing: border-box;">
       
       <!-- ═══ HEADER BLOCK ═══ -->
       <div style="padding: 32px 40px 24px; border-bottom: 4px solid #4f46e5;">
@@ -1742,7 +1742,7 @@ class VerifyAI {
     const aiColor = getScoreColor(aiPct);
 
     return `
-    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff; width: 100%; box-sizing: border-box;">
+    <div class="orig-report" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff; width: 100%; box-sizing: border-box;">
       
       <!-- HEADER -->
       <div style="padding: 28px 40px 20px; border-bottom: 4px solid #4f46e5; display: flex; justify-content: space-between; align-items: flex-end;">
