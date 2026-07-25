@@ -1107,23 +1107,23 @@ class VerifyAI {
               const plagColor = getColor(plagPct, 40, 20);
               const aiColor = getColor(aiPct, 60, 30);
               
-              return \`
-              <tr style="background: \${i % 2 === 0 ? '#ffffff' : '#f9fafb'};">
+              return `
+              <tr style="background: ${i % 2 === 0 ? '#ffffff' : '#f9fafb'};">
                 <td style="padding: 16px; border-bottom: 1px solid #e5e7eb;">
-                  <div style="font-weight: 600; color: #111827; margin-bottom: 4px;">\${i+1}. \${this.escapeHtml(d.name)}</div>
-                  <div style="font-size: 12px; color: #6b7280;">Words: \${(d.stats?.wordCount || 0).toLocaleString()}</div>
+                  <div style="font-weight: 600; color: #111827; margin-bottom: 4px;">${i+1}. ${this.escapeHtml(d.name)}</div>
+                  <div style="font-size: 12px; color: #6b7280;">Words: ${(d.stats?.wordCount || 0).toLocaleString()}</div>
                 </td>
                 <td style="padding: 16px; border-bottom: 1px solid #e5e7eb; text-align: center;">
-                  <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 13px; color: \${crossColor}; background: \${getBg(maxCross, 40, 20)};">\${maxCross}%</span>
+                  <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 13px; color: ${crossColor}; background: ${getBg(maxCross, 40, 20)};">${maxCross}%</span>
                 </td>
                 <td style="padding: 16px; border-bottom: 1px solid #e5e7eb; text-align: center;">
-                  <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 13px; color: \${plagColor}; background: \${getBg(plagPct, 40, 20)};">\${plagPct}%</span>
+                  <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 13px; color: ${plagColor}; background: ${getBg(plagPct, 40, 20)};">${plagPct}%</span>
                 </td>
                 <td style="padding: 16px; border-bottom: 1px solid #e5e7eb; text-align: center;">
-                  <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 13px; color: \${aiColor}; background: \${getBg(aiPct, 60, 30)};">\${aiPct}%</span>
+                  <span style="display: inline-block; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 13px; color: ${aiColor}; background: ${getBg(aiPct, 60, 30)};">${aiPct}%</span>
                 </td>
               </tr>
-              \`;
+              `;
             }).join('')}
           </tbody>
         </table>
@@ -1137,18 +1137,18 @@ class VerifyAI {
            const color = pct >= 40 ? '#dc2626' : '#d97706';
            const bg = pct >= 40 ? '#fef2f2' : '#fffbeb';
            const border = pct >= 40 ? '#fecaca' : '#fde68a';
-           return \`
-           <div style="padding: 16px; background: \${bg}; border: 1px solid \${border}; border-radius: 6px; display: flex; flex-direction: column; justify-content: center;">
+           return `
+           <div style="padding: 16px; background: ${bg}; border: 1px solid ${border}; border-radius: 6px; display: flex; flex-direction: column; justify-content: center;">
              <div style="font-size: 13px; color: #4b5563; margin-bottom: 8px; line-height: 1.4;">
-               <strong>\${this.escapeHtml(p.docA)}</strong><br>
+               <strong>${this.escapeHtml(p.docA)}</strong><br>
                <span style="color: #9ca3af; margin: 2px 0; display: inline-block;">matched with</span><br>
-               <strong>\${this.escapeHtml(p.docB)}</strong>
+               <strong>${this.escapeHtml(p.docB)}</strong>
              </div>
              <div style="margin-top: auto;">
-               <span style="color: \${color}; font-weight: 800; font-size: 18px;">\${pct}% Similarity</span>
+               <span style="color: ${color}; font-weight: 800; font-size: 18px;">${pct}% Similarity</span>
              </div>
            </div>
-           \`;
+           `;
         }).join('')}
       </div>
       ` : ''}
@@ -1685,15 +1685,15 @@ class VerifyAI {
           ${sources.map((s, i) => {
             const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
             const color = colors[i % colors.length];
-            return \`
+            return `
             <div style="display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
-              <div style="width: 30px; height: 30px; border-radius: 50%; background: \${color}; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 15px;">\${i+1}</div>
+              <div style="width: 30px; height: 30px; border-radius: 50%; background: ${color}; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 15px;">${i+1}</div>
               <div style="flex: 1;">
-                <div style="font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 2px; word-break: break-all;">\${this.escapeHtml(s.url)}</div>
-                <div style="font-size: 12px; color: #6b7280;">\${s.type}</div>
+                <div style="font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 2px; word-break: break-all;">${this.escapeHtml(s.url)}</div>
+                <div style="font-size: 12px; color: #6b7280;">${s.type}</div>
               </div>
-              <div style="font-size: 20px; font-weight: 800; color: #374151;">\${s.pct}<span style="font-size: 14px; color: #9ca3af; margin-left: 2px;">%</span></div>
-            </div>\`;
+              <div style="font-size: 20px; font-weight: 800; color: #374151;">${s.pct}<span style="font-size: 14px; color: #9ca3af; margin-left: 2px;">%</span></div>
+            </div>`;
           }).join('')}
         </div>
         ` : ''}
