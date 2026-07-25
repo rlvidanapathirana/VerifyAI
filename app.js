@@ -1039,45 +1039,45 @@ class VerifyAI {
     const submId   = `${Math.floor(Math.random() * 9000000000) + 1000000000}`;
 
     return `
-    <div class="bulk-pdf-report" style="padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff;">
+    <div class="bulk-pdf-report" style="padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff;">
       
       <!-- HEADER -->
-      <div style="border-bottom: 4px solid #4f46e5; padding-bottom: 25px; margin-bottom: 40px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-          <div>
-            <h1 style="margin: 0; color: #4f46e5; font-size: 36px; font-weight: 800; letter-spacing: -0.5px;">VerifyAI</h1>
-            <div style="font-size: 18px; color: #6b7280; font-weight: 300; margin-top: 4px;">Bulk Analysis Originality Report</div>
-          </div>
-          <div style="text-align: right; font-size: 13px; color: #9ca3af;">
-            <div style="margin-bottom: 4px;">Generated: <strong style="color: #4b5563;">${submDate}</strong></div>
-            <div>Batch ID: <strong style="color: #4b5563;">${submId}</strong></div>
-          </div>
+      <div style="padding: 28px 40px 20px; border-bottom: 4px solid #4f46e5; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+          <div style="margin: 0; color: #4f46e5; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">VerifyAI</div>
+          <div style="font-size: 13px; color: #6b7280; font-weight: 400; margin-top: 2px;">Bulk Analysis Originality Report</div>
+        </div>
+        <div style="text-align: right; font-size: 12px; color: #9ca3af;">
+          <div style="margin-bottom: 2px;">Generated: <strong style="color: #4b5563;">${submDate}</strong></div>
+          <div>Batch ID: <strong style="color: #4b5563;">${submId}</strong></div>
         </div>
       </div>
 
+
       <!-- SUMMARY CARDS -->
-      <div style="display: flex; gap: 24px; margin-bottom: 50px;">
-        <div style="flex: 1; padding: 25px; background: #f8fafc; border-left: 4px solid #64748b; border-radius: 4px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-          <div style="font-size: 42px; font-weight: 800; color: #1e293b; line-height: 1;">${n}</div>
-          <div style="font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-top: 10px; letter-spacing: 1px;">Documents Scanned</div>
+      <div style="padding: 20px 40px 0;">
+      <div style="display: flex; gap: 16px; margin-bottom: 24px;" class="no-break">
+        <div style="flex: 1; padding: 18px; background: #f8fafc; border-left: 4px solid #64748b; border-radius: 4px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 800; color: #1e293b; line-height: 1;">${n}</div>
+          <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-top: 8px; letter-spacing: 1px;">Documents Scanned</div>
         </div>
-        <div style="flex: 1; padding: 25px; background: #fff1f2; border-left: 4px solid #e11d48; border-radius: 4px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-          <div style="font-size: 42px; font-weight: 800; color: #be123c; line-height: 1;">
+        <div style="flex: 1; padding: 18px; background: #fff1f2; border-left: 4px solid #e11d48; border-radius: 4px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 800; color: #be123c; line-height: 1;">
             ${r.documents.filter(d => (d.similarity?.plagiarismPercent || 0) >= 40).length}
           </div>
-          <div style="font-size: 12px; font-weight: 600; color: #e11d48; text-transform: uppercase; margin-top: 10px; letter-spacing: 1px;">High Plagiarism Risk</div>
+          <div style="font-size: 11px; font-weight: 600; color: #e11d48; text-transform: uppercase; margin-top: 8px; letter-spacing: 1px;">High Plagiarism Risk</div>
         </div>
-        <div style="flex: 1; padding: 25px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-          <div style="font-size: 42px; font-weight: 800; color: #b45309; line-height: 1;">
+        <div style="flex: 1; padding: 18px; background: #fffbeb; border-left: 4px solid #f59e0b; border-radius: 4px; text-align: center;">
+          <div style="font-size: 32px; font-weight: 800; color: #b45309; line-height: 1;">
             ${r.documents.filter(d => (d.aiDetection?.aiPercent || 0) >= 60).length}
           </div>
-          <div style="font-size: 12px; font-weight: 600; color: #d97706; text-transform: uppercase; margin-top: 10px; letter-spacing: 1px;">High AI Risk</div>
+          <div style="font-size: 11px; font-weight: 600; color: #d97706; text-transform: uppercase; margin-top: 8px; letter-spacing: 1px;">High AI Risk</div>
         </div>
       </div>
 
       <!-- DETAILED MATRIX -->
-      <h2 style="font-size: 20px; color: #1f2937; margin-bottom: 20px; font-weight: 700;">Detailed Document Results</h2>
-      <div style="border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb;">
+      <div style="font-size: 13px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">Detailed Document Results</div>
+      <div style="border-radius: 8px; overflow: hidden; border: 1px solid #e5e7eb; margin-bottom: 24px;">
         <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
           <thead>
             <tr style="background: #f3f4f6;">
@@ -1583,158 +1583,136 @@ class VerifyAI {
       : this.escapeHtml(textInput);
 
     return `
-    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff; width: 100%; max-width: 800px; margin: 0 auto; box-sizing: border-box;">
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff; width: 100%; box-sizing: border-box;">
       
-      <!-- ═══ COVER PAGE ═══ -->
-      <div style="padding: 40px; min-height: 900px; position: relative;">
-        <div style="border-bottom: 4px solid #4f46e5; padding-bottom: 25px; margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end;">
+      <!-- ═══ HEADER BLOCK ═══ -->
+      <div style="padding: 32px 40px 24px; border-bottom: 4px solid #4f46e5;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
           <div>
-            <h1 style="margin: 0; color: #4f46e5; font-size: 36px; font-weight: 800; letter-spacing: -0.5px;">VerifyAI</h1>
-            <div style="font-size: 18px; color: #6b7280; font-weight: 300; margin-top: 4px;">Originality Report</div>
+            <div style="margin: 0; color: #4f46e5; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">VerifyAI</div>
+            <div style="font-size: 14px; color: #6b7280; font-weight: 400; margin-top: 2px;">Originality Report</div>
           </div>
-        </div>
-
-        <div style="margin-top: 100px; text-align: center;">
-          <div style="font-size: 32px; font-weight: 700; color: #111827; margin-bottom: 10px;">${this.escapeHtml(docName)}</div>
-          <div style="font-size: 16px; color: #6b7280; margin-bottom: 60px;">by VerifyAI Analysis Engine</div>
-        </div>
-
-        <div style="width: 100%; max-width: 500px; margin: 0 auto; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 25px;">
-          <div style="display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">
-            <span style="color: #64748b; font-weight: 600;">Submission date:</span>
-            <span style="color: #4f46e5; font-weight: 700;">${submDate}</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">
-            <span style="color: #64748b; font-weight: 600;">Submission ID:</span>
-            <span style="color: #1e293b; font-weight: 600;">${submId}</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">
-            <span style="color: #64748b; font-weight: 600;">File name:</span>
-            <span style="color: #1e293b; font-weight: 600; text-align: right; max-width: 250px; word-wrap: break-word;">${this.escapeHtml(docName)}</span>
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 15px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">
-            <span style="color: #64748b; font-weight: 600;">Word count:</span>
-            <span style="color: #1e293b; font-weight: 600;">${wordCount.toLocaleString()}</span>
-          </div>
-          <div style="display: flex; justify-content: space-between;">
-            <span style="color: #64748b; font-weight: 600;">Character count:</span>
-            <span style="color: #1e293b; font-weight: 600;">${Number(charCount).toLocaleString()}</span>
+          <div style="text-align: right; font-size: 12px; color: #9ca3af;">
+            <div style="margin-bottom: 2px;">Date: <strong style="color:#4b5563">${submDate}</strong></div>
+            <div>ID: <strong style="color:#4b5563">${submId}</strong></div>
           </div>
         </div>
       </div>
 
-      <!-- PAGE BREAK FOR PDF -->
-      <div style="page-break-before: always; width: 100%; height: 1px; background: transparent;"></div>
+      <!-- ═══ DOCUMENT META ═══ -->
+      <div style="padding: 20px 40px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; gap: 40px; flex-wrap: wrap;">
+        <div><span style="color:#64748b;font-size:12px;font-weight:600;">FILE</span><br><span style="color:#1e293b;font-weight:700;font-size:14px;">${this.escapeHtml(docName)}</span></div>
+        <div><span style="color:#64748b;font-size:12px;font-weight:600;">WORDS</span><br><span style="color:#1e293b;font-weight:700;font-size:14px;">${wordCount.toLocaleString()}</span></div>
+        <div><span style="color:#64748b;font-size:12px;font-weight:600;">CHARACTERS</span><br><span style="color:#1e293b;font-weight:700;font-size:14px;">${Number(charCount).toLocaleString()}</span></div>
+      </div>
 
       ${hasRef ? `
       <!-- ═══ HIGHLIGHTED TEXT VIEW ═══ -->
-      <div style="padding: 40px;">
-        <h2 style="font-size: 20px; color: #1f2937; margin-bottom: 20px; font-weight: 700; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">Document Text</h2>
-        <div style="font-size: 14px; line-height: 2; color: #374151; white-space: pre-wrap; font-family: 'Times New Roman', Times, serif;">
-          ${highlightedText.replace(/class="src-highlight hl-src-1"/g, 'style="background-color: #fca5a5; color: #7f1d1d; padding: 2px 0;"')
-                          .replace(/class="src-highlight hl-src-2"/g, 'style="background-color: #93c5fd; color: #1e3a8a; padding: 2px 0;"')
-                          .replace(/class="src-highlight hl-src-3"/g, 'style="background-color: #86efac; color: #14532d; padding: 2px 0;"')
-                          .replace(/class="src-highlight hl-src-4"/g, 'style="background-color: #fcd34d; color: #78350f; padding: 2px 0;"')
-                          .replace(/class="src-highlight hl-src-5"/g, 'style="background-color: #c4b5fd; color: #4c1d95; padding: 2px 0;"')
-                          .replace(/class="src-marker src-color-1"/g, 'style="display:none;"')
-                          .replace(/class="src-marker src-color-2"/g, 'style="display:none;"')
-                          .replace(/class="src-marker src-color-3"/g, 'style="display:none;"')
-                          .replace(/class="src-marker src-color-4"/g, 'style="display:none;"')
-                          .replace(/class="src-marker src-color-5"/g, 'style="display:none;"')
+      <div style="padding: 24px 40px;">
+        <div style="font-size: 13px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">Document Text (Highlighted Matches)</div>
+        <div style="font-size: 13px; line-height: 1.9; color: #374151; white-space: pre-wrap; font-family: 'Times New Roman', Times, serif;">
+          ${highlightedText.replace(/class="src-highlight hl-src-1"/g, 'style="background-color: #fca5a5; color: #7f1d1d; padding: 1px 0;"')
+                          .replace(/class="src-highlight hl-src-2"/g, 'style="background-color: #93c5fd; color: #1e3a8a; padding: 1px 0;"')
+                          .replace(/class="src-highlight hl-src-3"/g, 'style="background-color: #86efac; color: #14532d; padding: 1px 0;"')
+                          .replace(/class="src-highlight hl-src-4"/g, 'style="background-color: #fcd34d; color: #78350f; padding: 1px 0;"')
+                          .replace(/class="src-highlight hl-src-5"/g, 'style="background-color: #c4b5fd; color: #4c1d95; padding: 1px 0;"')
+                          .replace(/class="src-marker src-color-\d"/g, 'style="display:none;"')
           }
         </div>
       </div>
-      <div style="page-break-before: always; width: 100%; height: 1px; background: transparent;"></div>
+      <div class="pdf-page-break" style="page-break-before: always;"></div>
+
+      <!-- Header repeat after page break -->
+      <div style="padding: 16px 40px 12px; border-bottom: 2px solid #4f46e5; display:flex; justify-content:space-between;">
+        <span style="color:#4f46e5;font-weight:800;font-size:16px;">VerifyAI</span>
+        <span style="color:#9ca3af;font-size:11px;">Originality Report — ${this.escapeHtml(docName)}</span>
+      </div>
       ` : ''}
 
-      <!-- ═══ ORIGINALITY SCORE PAGE ═══ -->
-      <div style="padding: 40px;">
-        <h2 style="font-size: 24px; color: #1f2937; margin-bottom: 30px; font-weight: 800; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px;">Originality Report</h2>
+      <!-- ═══ ORIGINALITY SCORE SECTION ═══ -->
+      <div style="padding: 24px 40px;">
+        <div style="font-size: 13px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">Originality Analysis</div>
 
-        <div style="display: flex; align-items: flex-start; margin-bottom: 40px; gap: 40px;">
-          <div style="text-align: center; width: 200px;">
-            <div style="font-size: 80px; font-weight: 900; color: ${scoreColor}; line-height: 1; letter-spacing: -2px;">${pct}<span style="font-size: 40px;">%</span></div>
-            <div style="font-size: 16px; font-weight: 700; color: #4b5563; text-transform: uppercase; margin-top: 10px; letter-spacing: 1px;">Similarity Index</div>
+        <!-- Score + breakdown row -->
+        <div class="no-break" style="display: flex; align-items: stretch; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
+          <div style="text-align: center; background: #f8fafc; border: 2px solid ${scoreColor}; border-radius: 10px; padding: 20px 28px;">
+            <div style="font-size: 56px; font-weight: 900; color: ${scoreColor}; line-height: 1;">${pct}<span style="font-size: 28px;">%</span></div>
+            <div style="font-size: 11px; font-weight: 700; color: #4b5563; text-transform: uppercase; margin-top: 6px; letter-spacing: 1px;">Similarity Index</div>
           </div>
-
           ${hasRef ? `
-          <div style="display: flex; flex: 1; gap: 20px;">
-            <div style="flex: 1; text-align: center; background: #f8fafc; padding: 20px; border-radius: 8px;">
-              <div style="font-size: 28px; font-weight: 800; color: #3b82f6;">${internetPct}%</div>
-              <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 5px;">Internet Sources</div>
+          <div style="display: flex; flex: 1; gap: 12px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 90px; text-align: center; background: #eff6ff; padding: 14px 10px; border-radius: 8px;">
+              <div style="font-size: 22px; font-weight: 800; color: #3b82f6;">${internetPct}%</div>
+              <div style="font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 4px;">Internet</div>
             </div>
-            <div style="flex: 1; text-align: center; background: #f8fafc; padding: 20px; border-radius: 8px;">
-              <div style="font-size: 28px; font-weight: 800; color: #10b981;">${publicationsPct}%</div>
-              <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 5px;">Publications</div>
+            <div style="flex: 1; min-width: 90px; text-align: center; background: #f0fdf4; padding: 14px 10px; border-radius: 8px;">
+              <div style="font-size: 22px; font-weight: 800; color: #10b981;">${publicationsPct}%</div>
+              <div style="font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 4px;">Publications</div>
             </div>
-            <div style="flex: 1; text-align: center; background: #f8fafc; padding: 20px; border-radius: 8px;">
-              <div style="font-size: 28px; font-weight: 800; color: #8b5cf6;">${studentPapersPct}%</div>
-              <div style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 5px;">Student Papers</div>
+            <div style="flex: 1; min-width: 90px; text-align: center; background: #faf5ff; padding: 14px 10px; border-radius: 8px;">
+              <div style="font-size: 22px; font-weight: 800; color: #8b5cf6;">${studentPapersPct}%</div>
+              <div style="font-size: 10px; color: #64748b; font-weight: 600; text-transform: uppercase; margin-top: 4px;">Student Papers</div>
             </div>
-            <div style="flex: 1; text-align: center; background: #fffbeb; padding: 20px; border-radius: 8px; border: 1px solid #fde68a;">
-              <div style="font-size: 28px; font-weight: 800; color: ${aiColor};">${aiPct}%</div>
-              <div style="font-size: 12px; color: #d97706; font-weight: 600; text-transform: uppercase; margin-top: 5px;">AI Content</div>
+            <div style="flex: 1; min-width: 90px; text-align: center; background: #fffbeb; padding: 14px 10px; border-radius: 8px; border: 1px solid #fde68a;">
+              <div style="font-size: 22px; font-weight: 800; color: ${aiColor};">${aiPct}%</div>
+              <div style="font-size: 10px; color: #d97706; font-weight: 600; text-transform: uppercase; margin-top: 4px;">AI Content</div>
             </div>
           </div>
-          ` : '<div style="color:#9ca3af;font-style:italic;font-size:14px;padding-top:20px;">No reference text provided — add reference for full comparison</div>'}
+          ` : `<div style="color:#9ca3af;font-style:italic;font-size:13px;padding:20px 0;">No reference text provided — add reference text for full plagiarism comparison</div>`}
         </div>
 
         ${hasRef && sources.length ? `
-        <h3 style="font-size: 18px; color: #1f2937; margin-bottom: 15px; font-weight: 700;">Primary Sources</h3>
-        <div style="margin-bottom: 40px;">
+        <!-- Primary Sources -->
+        <div class="no-break" style="margin-bottom: 20px;">
+          <div style="font-size: 12px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Primary Sources</div>
           ${sources.map((s, i) => {
             const colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
             const color = colors[i % colors.length];
-            return `
-            <div style="display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f3f4f6;">
-              <div style="width: 30px; height: 30px; border-radius: 50%; background: ${color}; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 14px; margin-right: 15px;">${i+1}</div>
-              <div style="flex: 1;">
-                <div style="font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 2px; word-break: break-all;">${this.escapeHtml(s.url)}</div>
-                <div style="font-size: 12px; color: #6b7280;">${s.type}</div>
+            return `<div style="display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #f3f4f6;">
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: ${color}; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 11px; margin-right: 12px; flex-shrink:0;">${i+1}</div>
+              <div style="flex: 1; overflow: hidden;">
+                <div style="font-size: 12px; font-weight: 600; color: #111827; word-break: break-all;">${this.escapeHtml(s.url)}</div>
+                <div style="font-size: 11px; color: #6b7280;">${s.type}</div>
               </div>
-              <div style="font-size: 20px; font-weight: 800; color: #374151;">${s.pct}<span style="font-size: 14px; color: #9ca3af; margin-left: 2px;">%</span></div>
+              <div style="font-size: 16px; font-weight: 800; color: #374151; margin-left: 12px; flex-shrink:0;">${s.pct}<span style="font-size: 11px; color: #9ca3af;">%</span></div>
             </div>`;
           }).join('')}
         </div>
         ` : ''}
 
-        <!-- ═══ ALGORITHM BREAKDOWN ═══ -->
         ${hasRef ? `
-        <h3 style="font-size: 18px; color: #1f2937; margin-bottom: 15px; font-weight: 700;">Detection Algorithm Breakdown</h3>
-        <div style="margin-bottom: 40px; padding: 25px; background: #f8fafc; border-radius: 8px;">
-          ${this.renderOrigAlgoBar('TF-IDF Cosine Similarity',        Math.round((r.similarity?.cosine || 0) * 100),           '#4f46e5')}
-          ${this.renderOrigAlgoBar('Bigram Jaccard Index',            Math.round((r.similarity?.bigramJaccard || 0) * 100),    '#0ea5e9')}
-          ${this.renderOrigAlgoBar('Trigram Jaccard Index',           Math.round((r.similarity?.trigramJaccard || 0) * 100),   '#0ea5e9')}
-          ${this.renderOrigAlgoBar('Rabin-Karp Fingerprint (Winnowing)', Math.round((r.fingerprint?.jaccard || 0) * 100),     '#f59e0b')}
-          ${this.renderOrigAlgoBar('Longest Common Subsequence (LCS)', Math.round((r.lcs?.lcsSimilarity || 0) * 100),          '#10b981')}
+        <!-- Algorithm Breakdown -->
+        <div class="no-break" style="margin-bottom: 20px; padding: 16px 20px; background: #f8fafc; border-radius: 8px;">
+          <div style="font-size: 12px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Detection Algorithm Breakdown</div>
+          ${this.renderOrigAlgoBar('TF-IDF Cosine Similarity',             Math.round((r.similarity?.cosine || 0) * 100),           '#4f46e5')}
+          ${this.renderOrigAlgoBar('Bigram Jaccard Index',                 Math.round((r.similarity?.bigramJaccard || 0) * 100),    '#0ea5e9')}
+          ${this.renderOrigAlgoBar('Trigram Jaccard Index',                Math.round((r.similarity?.trigramJaccard || 0) * 100),   '#0ea5e9')}
+          ${this.renderOrigAlgoBar('Rabin-Karp Fingerprint (Winnowing)',   Math.round((r.fingerprint?.jaccard || 0) * 100),         '#f59e0b')}
+          ${this.renderOrigAlgoBar('Longest Common Subsequence (LCS)',     Math.round((r.lcs?.lcsSimilarity || 0) * 100),           '#10b981')}
         </div>
         ` : ''}
 
-        <!-- ═══ AI DETECTION SECTION ═══ -->
         ${r.aiDetection ? `
-        <h3 style="font-size: 18px; color: #1f2937; margin-bottom: 15px; font-weight: 700;">AI Content Detection</h3>
-        <div style="margin-bottom: 40px; padding: 25px; background: #fffbeb; border-radius: 8px; border: 1px solid #fef3c7;">
-          
-          <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 25px; border-bottom: 1px solid #fde68a; padding-bottom: 20px;">
-            <div style="font-size: 48px; font-weight: 900; color: ${aiColor}; line-height: 1;">${aiPct}%</div>
+        <!-- AI Detection -->
+        <div class="no-break" style="margin-bottom: 20px; padding: 16px 20px; background: #fffbeb; border-radius: 8px; border: 1px solid #fef3c7;">
+          <div style="font-size: 12px; font-weight: 700; color: #374151; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">AI Content Detection</div>
+          <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #fde68a;">
+            <div style="font-size: 36px; font-weight: 900; color: ${aiColor}; line-height: 1;">${aiPct}%</div>
             <div>
-              <div style="font-size: 18px; font-weight: 700; color: #111827;">${r.aiDetection.icon} ${r.aiDetection.verdict}</div>
-              <div style="font-size: 13px; color: #6b7280; margin-top: 4px;">${r.aiDetection.confidence}</div>
+              <div style="font-size: 14px; font-weight: 700; color: #111827;">${r.aiDetection.icon || ''} ${r.aiDetection.verdict || ''}</div>
+              <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">${r.aiDetection.confidence || ''}</div>
             </div>
           </div>
-          
-          <div>
-            ${this.renderOrigAlgoBar('Sentence Length Uniformity',  Math.round((r.aiDetection.signals?.sentenceLengthUniformity || 0)*100), '#f59e0b')}
-            ${this.renderOrigAlgoBar('Transition Word Density',     Math.round((r.aiDetection.signals?.transitionWordDensity || 0)*100),     '#f59e0b')}
-            ${this.renderOrigAlgoBar('Long Word Ratio',             Math.round((r.aiDetection.signals?.longWordRatio || 0)*100),             '#f59e0b')}
-            ${this.renderOrigAlgoBar('Structural Repetition',       Math.round((r.aiDetection.signals?.structuralRepetition || 0)*100),      '#f59e0b')}
-            ${this.renderOrigAlgoBar('Perplexity Proxy',            Math.round((r.aiDetection.signals?.perplexityProxy || 0)*100),           '#4f46e5')}
-          </div>
+          ${this.renderOrigAlgoBar('Sentence Length Uniformity',  Math.round((r.aiDetection.signals?.sentenceLengthUniformity || 0)*100), '#f59e0b')}
+          ${this.renderOrigAlgoBar('Transition Word Density',     Math.round((r.aiDetection.signals?.transitionWordDensity || 0)*100),     '#f59e0b')}
+          ${this.renderOrigAlgoBar('Long Word Ratio',             Math.round((r.aiDetection.signals?.longWordRatio || 0)*100),             '#f59e0b')}
+          ${this.renderOrigAlgoBar('Structural Repetition',       Math.round((r.aiDetection.signals?.structuralRepetition || 0)*100),      '#f59e0b')}
+          ${this.renderOrigAlgoBar('Perplexity Proxy',            Math.round((r.aiDetection.signals?.perplexityProxy || 0)*100),           '#4f46e5')}
         </div>
         ` : ''}
 
-        <!-- ═══ FOOTER ═══ -->
-        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; font-size: 11px; color: #9ca3af;">
+        <!-- Footer -->
+        <div style="margin-top: 24px; padding-top: 12px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; font-size: 10px; color: #9ca3af;">
           <div>Powered by VerifyAI Analysis Engine</div>
           <div>Confidential Report — ID: ${submId}</div>
         </div>
@@ -1764,26 +1742,26 @@ class VerifyAI {
     const aiColor = getScoreColor(aiPct);
 
     return `
-    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff; width: 100%; max-width: 800px; margin: 0 auto; padding: 40px; box-sizing: border-box;">
+    <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff; width: 100%; box-sizing: border-box;">
       
       <!-- HEADER -->
-      <div style="border-bottom: 4px solid #4f46e5; padding-bottom: 25px; margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end;">
+      <div style="padding: 28px 40px 20px; border-bottom: 4px solid #4f46e5; display: flex; justify-content: space-between; align-items: flex-end;">
         <div>
-          <h1 style="margin: 0; color: #4f46e5; font-size: 36px; font-weight: 800; letter-spacing: -0.5px;">VerifyAI</h1>
-          <div style="font-size: 18px; color: #6b7280; font-weight: 300; margin-top: 4px;">AI Content Analysis Report</div>
+          <div style="margin: 0; color: #4f46e5; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;">VerifyAI</div>
+          <div style="font-size: 13px; color: #6b7280; font-weight: 400; margin-top: 2px;">AI Content Analysis Report</div>
         </div>
-        <div style="text-align: right; font-size: 13px; color: #9ca3af;">
-          <div style="margin-bottom: 4px;">Generated: <strong style="color: #4b5563;">${submDate}</strong></div>
+        <div style="text-align: right; font-size: 12px; color: #9ca3af;">
+          <div style="margin-bottom: 2px;">Generated: <strong style="color: #4b5563;">${submDate}</strong></div>
           <div>Report ID: <strong style="color: #4b5563;">${submId}</strong></div>
         </div>
       </div>
 
       <!-- MAIN VERDICT -->
-      <div style="text-align: center; padding: 50px 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 40px; position: relative; overflow: hidden;">
-        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: ${aiColor};"></div>
-        <div style="font-size: 120px; font-weight: 900; color: ${aiColor}; line-height: 1; margin-bottom: 20px; letter-spacing: -4px;">${aiPct}<span style="font-size: 60px;">%</span></div>
-        <div style="font-size: 24px; font-weight: 800; color: #1e293b; margin-bottom: 8px;">${r.aiDetection.icon} ${r.aiDetection.verdict}</div>
-        <div style="font-size: 15px; color: #64748b; font-weight: 500;">${r.aiDetection.confidence}</div>
+      <div class="no-break" style="margin: 24px 40px; text-align: center; padding: 30px 20px; background: #f8fafc; border-radius: 10px; border: 2px solid ${aiColor}; position: relative; overflow: hidden;">
+        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: ${aiColor};"></div>
+        <div style="font-size: 72px; font-weight: 900; color: ${aiColor}; line-height: 1; margin-bottom: 12px; letter-spacing: -2px;">${aiPct}<span style="font-size: 36px;">%</span></div>
+        <div style="font-size: 20px; font-weight: 800; color: #1e293b; margin-bottom: 6px;">${r.aiDetection.icon || ''} ${r.aiDetection.verdict || ''}</div>
+        <div style="font-size: 13px; color: #64748b; font-weight: 500;">${r.aiDetection.confidence || ''}</div>
       </div>
 
       <!-- BREAKDOWN CARDS -->

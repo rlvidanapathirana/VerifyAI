@@ -63,16 +63,16 @@ class ExportManager {
       rows.push(['BULK ANALYSIS REPORT']);
       rows.push(['Document', 'Word Count', 'Avg Similarity with Others', 'Max Similarity', 'Most Similar To']);
       reportData.documents.forEach((doc, i) => {
-        const sims = reportData.matrix[i].filter((_, j) => j !== i);
-        const avg = sims.reduce((a, b) => a + b, 0) / (sims.length || 1);
-        const max = Math.max(...sims);
-        const maxIdx = reportData.matrix[i].indexOf(max);
+        const sims = reportData.matrix ? reportData.matrix[i].filter((_, j) => j !== i) : [];
+        const avg = sims.length ? sims.reduce((a, b) => a + b, 0) / sims.length : 0;
+        const max = sims.length ? Math.max(...sims) : 0;
+        const maxIdx = sims.length ? reportData.matrix[i].indexOf(max) : -1;
         rows.push([
           doc.name,
           doc.stats?.wordCount || '-',
           `${Math.round(avg * 100)}%`,
           `${Math.round(max * 100)}%`,
-          reportData.documents[maxIdx]?.name || '-'
+          maxIdx >= 0 ? reportData.documents[maxIdx]?.name || '-' : '-'
         ]);
       });
     }
@@ -84,90 +84,80 @@ class ExportManager {
     this.downloadBlob(csvContent, `${filename}.csv`, 'text/csv;charset=utf-8;');
   }
 
-  /* ─── PDF — Turnitin-Style White Report ────────────────────── */
+  /* ─── PDF — Clean A4 Report (no blank pages) ────────────────── */
   async exportPDF(reportData, filename = 'originality-report') {
     if (typeof html2pdf === 'undefined') {
       alert('html2pdf library not loaded. Please check your internet connection.');
       return;
     }
 
-    // Try to find the Turnitin modal first (for single)
-    let element = document.querySelector('.orig-report');
-    
-    // If modal is not open, we need to create a temporary container
-    let tempContainer = null;
-    if (!element) {
-      if (window.app) {
-        tempContainer = document.createElement('div');
-        if (reportData.type === 'bulk' && window.app.renderBulkPDFTemplate) {
-          tempContainer.innerHTML = window.app.renderBulkPDFTemplate(reportData);
-        } else if (reportData.type === 'ai' && window.app.renderAIPDFTemplate) {
-          tempContainer.innerHTML = window.app.renderAIPDFTemplate(reportData);
-        } else if (window.app.renderTurnitinModal) {
-          tempContainer.innerHTML = window.app.renderTurnitinModal(reportData);
-        } else {
-          alert("Cannot generate PDF: Report template not found.");
-          return;
-        }
-        tempContainer.style.position = 'absolute';
-        tempContainer.style.left = '-9999px';
-        tempContainer.style.width = '800px'; // fixed width for PDF rendering
-        tempContainer.style.background = '#fff';
-        document.body.appendChild(tempContainer);
-        element = tempContainer.firstElementChild;
-      } else {
-        alert("Cannot generate PDF: Report template not found.");
-        return;
-      }
-    }
-
-    // Ensure the element doesn't have overflow/height restrictions for PDF rendering
-    const originalStyles = {
-      maxHeight: element.style.maxHeight,
-      overflow: element.style.overflow,
-      height: element.style.height
-    };
-    element.style.maxHeight = 'none';
-    element.style.overflow = 'visible';
-    element.style.height = 'auto';
-
-    // Configure html2pdf
-    const opt = {
-      margin:       [15, 10, 15, 10], // top, left, bottom, right
-      filename:     `${filename}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false, windowWidth: 800 },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak:    { mode: ['css', 'legacy'] }
-    };
-
     // Show loading overlay
     const overlay = document.getElementById('loading-overlay');
+    const overlayText = overlay?.querySelector('.loading-text');
+    const overlaySub  = overlay?.querySelector('.loading-subtext');
     if (overlay) {
-      overlay.querySelector('.loading-text').textContent = "Generating PDF...";
-      overlay.querySelector('.loading-subtext').textContent = "Rendering high-quality layout";
+      if (overlayText) overlayText.textContent = 'Generating PDF...';
+      if (overlaySub)  overlaySub.textContent  = 'Rendering high-quality report layout';
       overlay.classList.add('active');
     }
 
+    if (!window.app) {
+      alert('Cannot generate PDF: App not ready.');
+      if (overlay) overlay.classList.remove('active');
+      return;
+    }
+
+    // Build an off-screen container — always use template methods
+    const container = document.createElement('div');
+    container.style.cssText = 'position:absolute;left:-9999px;top:0;width:794px;background:#ffffff;';
+    document.body.appendChild(container);
+
     try {
+      let html = '';
+      if (reportData.type === 'bulk') {
+        html = window.app.renderBulkPDFTemplate(reportData);
+      } else if (reportData.type === 'ai') {
+        html = window.app.renderAIPDFTemplate(reportData);
+      } else {
+        html = window.app.renderTurnitinModal(reportData);
+      }
+      container.innerHTML = html;
+
+      // Wait for layout reflow
+      await new Promise(r => setTimeout(r, 400));
+
+      const element = container.firstElementChild || container;
+      element.style.maxHeight = 'none';
+      element.style.overflow  = 'visible';
+      element.style.height    = 'auto';
+
+      const opt = {
+        margin:      [12, 12, 12, 12],
+        filename:    `${filename}.pdf`,
+        image:       { type: 'jpeg', quality: 0.95 },
+        html2canvas: {
+          scale:       2,
+          useCORS:     true,
+          logging:     false,
+          width:       794,
+          windowWidth: 794,
+          scrollX:     0,
+          scrollY:     0
+        },
+        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:   { mode: 'css', before: '.pdf-page-break', avoid: '.no-break' }
+      };
+
       await html2pdf().set(opt).from(element).save();
     } catch (e) {
-      console.error("PDF generation failed", e);
-      alert("Failed to generate PDF");
+      console.error('PDF generation failed', e);
+      alert('Failed to generate PDF: ' + e.message);
     } finally {
-      if (tempContainer) {
-        document.body.removeChild(tempContainer);
-      } else {
-        // Restore original styles if we used the active modal
-        element.style.maxHeight = originalStyles.maxHeight;
-        element.style.overflow = originalStyles.overflow;
-        element.style.height = originalStyles.height;
-      }
-      if (overlay) {
-        overlay.classList.remove('active');
-      }
+      if (container.parentNode) document.body.removeChild(container);
+      if (overlay) overlay.classList.remove('active');
     }
   }
+
   downloadBlob(content, filename, mimeType) {
     const blob = new Blob([content], { type: mimeType });
     const url  = URL.createObjectURL(blob);
