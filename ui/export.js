@@ -474,7 +474,7 @@ class ExportManager {
     const humanPct   = aiData.humanPercent ?? (100 - aiPct);
     const verdict    = aiData.verdict    || 'Unknown';
     const confidence = aiData.confidence || '';
-    const aiIcon     = aiData.icon       || '';
+    const aiIcon     = ''; // emoji not supported in jsPDF — removed
     const modelSig   = aiData.modelSignature?.model ? aiData.modelSignature : null;
     
     // Same colour logic as web: orange/amber for AI, green for human
@@ -489,11 +489,12 @@ class ExportManager {
     doc.setLineWidth(0.8);
     doc.roundedRect(ML, y, CW, 30, 3, 3, 'FD');
     
-    // Icon + verdict label (same as web)
+    // Verdict label — strip all emoji/non-ASCII from verdict string for clean PDF text
+    const cleanVerdict = verdict.replace(/[^\x00-\x7F]/g, '').trim() || verdict;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(14);
     doc.setTextColor(...verdictClr);
-    doc.text(`${aiIcon}  ${verdict}`, ML + 6, y + 11);
+    doc.text(cleanVerdict, ML + 6, y + 11);
     
     // Confidence string directly (same as web)
     doc.setFont('helvetica', 'normal');
