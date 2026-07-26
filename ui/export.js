@@ -404,7 +404,7 @@ class ExportManager {
       doc.setFont('helvetica', 'bold');
       doc.setFontSize(10);
       doc.setTextColor(17, 24, 39);
-      doc.text(`${r.aiDetection.icon || ''} ${r.aiDetection.verdict || ''}`, ML + 46, y + 9);
+      doc.text(`${r.aiDetection.verdict || ''}`, ML + 46, y + 9);
 
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
@@ -543,9 +543,9 @@ class ExportManager {
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(7.5);
         doc.setTextColor(17, 24, 39);
-        const a = pair.docA.length > 42 ? pair.docA.slice(0,39)+'...' : pair.docA;
-        const b = pair.docB.length > 42 ? pair.docB.slice(0,39)+'...' : pair.docB;
-        doc.text(`${a}  ⟷  ${b}`, ML + 2, y + 7);
+        const a = pair.docA.length > 30 ? pair.docA.slice(0,27)+'...' : pair.docA;
+        const b = pair.docB.length > 30 ? pair.docB.slice(0,27)+'...' : pair.docB;
+        doc.text(`${a}  vs  ${b}`, ML + 2, y + 7);
 
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(11);
@@ -565,7 +565,8 @@ class ExportManager {
   _buildAIPDF(doc, r) {
     const PW = 210, PH = 297, ML = 15, MR = 15, MB = 15, CW = 180;
 
-    const aiPct  = r.aiDetection?.aiPercent || 0;
+    const aiData = r.aiDetection || r;
+    const aiPct  = aiData.aiPercent || 0;
     const aiClr  = this._scoreColor(aiPct);
     const [ar,ag,ab] = this._hex2rgb(aiClr);
 
@@ -594,17 +595,17 @@ class ExportManager {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(13);
     doc.setTextColor(17, 24, 39);
-    doc.text(`${r.aiDetection.icon || ''} ${r.aiDetection.verdict || ''}`, ML + CW / 2, y + 41, { align: 'center' });
+    doc.text(`${aiData.verdict || ''}`, ML + CW / 2, y + 41, { align: 'center' });
 
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8.5);
     doc.setTextColor(100, 116, 139);
-    doc.text(r.aiDetection.confidence || '', ML + CW / 2, y + 49, { align: 'center' });
+    doc.text(aiData.confidence || '', ML + CW / 2, y + 49, { align: 'center' });
 
     y += 64;
     y = this._drawSection(doc, 'Detection Signals', y);
 
-    const sigs = r.aiDetection.signals || {};
+    const sigs = aiData.signals || {};
     y = this._drawBar(doc, 'Sentence Length Uniformity (Burstiness proxy)', Math.round((sigs.sentenceLengthUniformity||0)*100), '#f59e0b', y);
     y = this._drawBar(doc, 'Transition Word Density',                       Math.round((sigs.transitionWordDensity||0)*100),    '#f59e0b', y);
     y = this._drawBar(doc, 'Long Word Ratio (Lexical proxy)',                Math.round((sigs.longWordRatio||0)*100),            '#f59e0b', y);
