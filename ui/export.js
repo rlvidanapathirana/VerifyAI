@@ -107,79 +107,55 @@ class ExportManager {
       return;
     }
 
-    // Try to find the active modal's originality report element
-    let element = document.querySelector('.orig-report');
-    let tempContainer = null;
-
-    if (!element) {
-      // Build a temporary container inside normal flow, hidden under loading overlay
-      tempContainer = document.createElement('div');
-      tempContainer.style.cssText = 'position:relative;width:794px;background:#ffffff;margin:0 auto;padding:0;';
-      
-      let html = '';
-      if (reportData.type === 'bulk') {
-        html = window.app.renderBulkPDFTemplate(reportData);
-      } else if (reportData.type === 'ai') {
-        html = window.app.renderAIPDFTemplate(reportData);
-      } else {
-        html = window.app.renderTurnitinModal(reportData);
-      }
-      tempContainer.innerHTML = html;
-      document.body.appendChild(tempContainer);
-      element = tempContainer.firstElementChild || tempContainer;
-    }
-
-    // Ensure the element doesn't have overflow/height restrictions for PDF rendering
-    const originalStyles = {
-      maxHeight: element.style.maxHeight,
-      overflow: element.style.overflow,
-      height: element.style.height
-    };
-    element.style.maxHeight = 'none';
-    element.style.overflow = 'visible';
-    element.style.height = 'auto';
-
-    // Wait for layout reflow
-    await new Promise(r => setTimeout(r, 450));
-
-    // Save scroll position to prevent html2canvas offset bugs
-    const scrollX = window.scrollX;
-    const scrollY = window.scrollY;
-    window.scrollTo(0, 0);
-
-    const opt = {
-      margin:      [12, 12, 12, 12],
-      filename:    `${filename}.pdf`,
-      image:       { type: 'jpeg', quality: 0.95 },
-      html2canvas: {
-        scale:       2,
-        useCORS:     true,
-        logging:     false,
-        windowWidth: 794,
-        scrollX:     0,
-        scrollY:     0
-      },
-      jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
-      pagebreak:   { mode: 'css', before: '.pdf-page-break', avoid: '.no-break' }
-    };
-
     try {
-      await html2pdf().set(opt).from(element).save();
+      // Build the report HTML from the appropriate template
+      let innerHtml = '';
+      if (reportData.type === 'bulk') {
+        innerHtml = window.app.renderBulkPDFTemplate(reportData);
+      } else if (reportData.type === 'ai') {
+        innerHtml = window.app.renderAIPDFTemplate(reportData);
+      } else {
+        innerHtml = window.app.renderTurnitinModal(reportData);
+      }
+
+      // Wrap with a complete self-contained HTML document for iframe rendering
+      // This is the KEY fix: html2pdf .from(html,'string') renders in a clean iframe at 0,0
+      // avoiding all scroll/position offset bugs entirely.
+      const fullHtml = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #fff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; width: 794px; }
+  .pdf-page-break { page-break-before: always; }
+  .no-break { page-break-inside: avoid; }
+</style>
+</head>
+<body>${innerHtml}</body>
+</html>`;
+
+      const opt = {
+        margin:      [12, 12, 12, 12],
+        filename:    `${filename}.pdf`,
+        image:       { type: 'jpeg', quality: 0.97 },
+        html2canvas: {
+          scale:       2,
+          useCORS:     true,
+          logging:     false,
+          windowWidth: 794
+        },
+        jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak:   { mode: 'css', before: '.pdf-page-break', avoid: '.no-break' }
+      };
+
+      await html2pdf().set(opt).from(fullHtml, 'string').save();
+
     } catch (e) {
       console.error('PDF generation failed', e);
       alert('Failed to generate PDF: ' + e.message);
     } finally {
-      // Restore scroll position
-      window.scrollTo(scrollX, scrollY);
-      
-      if (tempContainer) {
-        document.body.removeChild(tempContainer);
-      } else {
-        // Restore original styles
-        element.style.maxHeight = originalStyles.maxHeight;
-        element.style.overflow = originalStyles.overflow;
-        element.style.height = originalStyles.height;
-      }
       if (overlay) overlay.classList.remove('active');
     }
   }
