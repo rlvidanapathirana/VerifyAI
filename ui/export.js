@@ -469,50 +469,71 @@ class ExportManager {
     doc.text('AI CONTENT DETECTION ANALYSIS', ML, 19);
     y = 40;
 
-    const aiData   = r.aiDetection || {};
-    // aiScore is 0–1 decimal from engine; aiPercent / humanPercent are already 0–100 integers
+    const aiData     = r.aiDetection || {};
     const aiPct      = aiData.aiPercent  ?? Math.round((aiData.aiScore || 0) * 100);
     const humanPct   = aiData.humanPercent ?? (100 - aiPct);
-    const verdict    = aiData.verdict || '';  // "Likely AI-Generated" | "Human-Written" | etc.
-    const confidence = aiData.confidence || ''; // "High Confidence" | "Medium Confidence" | "Low"
+    const verdict    = aiData.verdict    || 'Unknown';
+    const confidence = aiData.confidence || '';
+    const aiIcon     = aiData.icon       || '';
+    const modelSig   = aiData.modelSignature?.model ? aiData.modelSignature : null;
     
-    // Verdict box — use the engine's own verdict string to decide colour
-    const isAI = verdict.toLowerCase().includes('ai') || aiPct >= 50;
-    const verdictBg  = isAI ? [254,226,226] : [220,252,231];
-    const verdictBdr = isAI ? [220,38,38]   : [22,163,74];
-    const verdictClr = isAI ? [185,28,28]   : [21,128,61];
+    // Same colour logic as web: orange/amber for AI, green for human
+    const isAIVerdict = verdict.toLowerCase().includes('ai-generated') || verdict.toLowerCase().includes('ai generated') || aiPct >= 70;
+    const verdictBg  = isAIVerdict ? [254, 226, 226] : (aiPct >= 45 ? [255, 251, 235] : [220, 252, 231]);
+    const verdictBdr = isAIVerdict ? [220, 38,  38 ] : (aiPct >= 45 ? [245, 158, 11 ] : [22,  163, 74 ]);
+    const verdictClr = isAIVerdict ? [185, 28,  28 ] : (aiPct >= 45 ? [180, 83,  9  ] : [21,  128, 61 ]);
+
+    // Verdict box
     doc.setFillColor(...verdictBg);
     doc.setDrawColor(...verdictBdr);
     doc.setLineWidth(0.8);
-    doc.roundedRect(ML, y, CW, 28, 3, 3, 'FD');
+    doc.roundedRect(ML, y, CW, 30, 3, 3, 'FD');
     
-    const verdictLabel = verdict || (isAI ? 'AI-GENERATED' : 'HUMAN-WRITTEN');
+    // Icon + verdict label (same as web)
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
+    doc.setFontSize(14);
     doc.setTextColor(...verdictClr);
-    doc.text(verdictLabel.toUpperCase(), ML + 6, y + 11);
+    doc.text(`${aiIcon}  ${verdict}`, ML + 6, y + 11);
     
-    // Sub-label: only show model name when AI, otherwise show confidence
-    const modelSig = aiData.modelSignature?.model || '';
-    const subLabel  = isAI && modelSig
-        ? `Detected: ${modelSig} (${Math.round((aiData.modelSignature?.confidence||0)*100)}% match)`
-        : confidence;
+    // Confidence string directly (same as web)
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(...verdictClr);
-    doc.text(subLabel, ML + 6, y + 20);
-    
-    // Right side: big % score
+    doc.text(confidence, ML + 6, y + 21);
+
+    // Right side: AI% and Human% (same as web score ring)
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(22);
+    doc.setFontSize(18);
     doc.setTextColor(...verdictClr);
-    doc.text(`${isAI ? aiPct : humanPct}%`, PW - ML - 20, y + 12, { align: 'right' });
+    doc.text(`${aiPct}%`, PW - ML - 6, y + 12, { align: 'right' });
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.text(isAI ? 'AI Score' : 'Human Score', PW - ML - 20, y + 20, { align: 'right' });
-    y += 36;
+    doc.setTextColor(120, 120, 120);
+    doc.text('AI Score', PW - ML - 6, y + 20, { align: 'right' });
+    y += 38;
 
-    // Scores summary row — all from real engine data, no maths here
+    // Detected model block (shown ALWAYS if detected — regardless of verdict — same as web)
+    if (modelSig) {
+        doc.setFillColor(255, 248, 230);
+        doc.setDrawColor(245, 158, 11);
+        doc.setLineWidth(0.6);
+        doc.roundedRect(ML, y, CW, 20, 2, 2, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(120, 80, 0);
+        doc.text('Detected:', ML + 6, y + 8);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(180, 83, 9);
+        doc.text(modelSig.model, ML + 28, y + 8);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        doc.setTextColor(120, 80, 0);
+        doc.text(`(${Math.round((modelSig.confidence || 0) * 100)}% match)`, ML + 6, y + 15);
+        y += 26;
+    }
+
+    // Scores summary row
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
     doc.setTextColor(80, 80, 80);
