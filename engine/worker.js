@@ -14,10 +14,10 @@ self.onmessage = function(e) {
       
       const stats = nlp.getTextStats(textA);
       
-      self.postMessage({ type: 'progress', pct: 20 });
+      self.postMessage({ type: 'progress', pct: 20, msg: 'Analyzing text statistics...' });
       const aiDetection = aiDetector.analyze(textA);
       
-      self.postMessage({ type: 'progress', pct: 40 });
+      self.postMessage({ type: 'progress', pct: 40, msg: 'Running AI detection models...' });
       
       let similarity = null;
       let sentenceMatches = [];
@@ -27,10 +27,10 @@ self.onmessage = function(e) {
       
       if (finalTextB.length > 50) {
         similarity = nlp.analyzeSimilarity(textA, finalTextB);
-        self.postMessage({ type: 'progress', pct: 70 });
+        self.postMessage({ type: 'progress', pct: 70, msg: 'Comparing similarity with sources...' });
         
         sentenceMatches = nlp.getSentenceMatches(textA, finalTextB);
-        self.postMessage({ type: 'progress', pct: 90 });
+        self.postMessage({ type: 'progress', pct: 90, msg: 'Matching individual sentences...' });
         
         // Distribution of internet score
         if (internetText && internetText.length > 30) {
@@ -100,7 +100,7 @@ self.onmessage = function(e) {
           completedPairs++;
           // Send cross matrix progress (scaled between 85 and 100)
           const pct = 85 + (completedPairs / Math.max(totalPairs, 1)) * 15;
-          self.postMessage({ type: 'progress', pct: pct });
+          self.postMessage({ type: 'progress', pct: pct, msg: `Cross-checking pairs (${completedPairs}/${totalPairs})...` });
         }
       }
       
