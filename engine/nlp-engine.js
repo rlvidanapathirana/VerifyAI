@@ -335,7 +335,7 @@ class NLPEngine {
       }
     });
 
-    return matches.sort((a, b) => b.similarity - a.similarity).slice(0, 20);
+    return matches.sort((a, b) => b.similarity - a.similarity);
   }
 
   // ─── Bulk Matrix ───────────────────────────────────────────────────────────

@@ -233,216 +233,279 @@ class ExportManager {
   }
 
   /* ══════════════════════════════════════════════════════════════
-     SINGLE DOCUMENT PDF
+     SINGLE DOCUMENT PDF (Turnitin Style)
   ══════════════════════════════════════════════════════════════ */
   _buildSinglePDF(doc, r) {
     const PW = 210, PH = 297, ML = 15, MB = 15, CW = 180;
-
-    const pct       = r.similarity?.plagiarismPercent || 0;
-    const aiPct     = r.aiDetection?.aiPercent || 0;
-    const hasRef    = !!(r.similarity && r.similarity.combined > 0);
-    const scoreClr  = this._scoreColor(pct);
-    const aiClr     = this._scoreColor(aiPct);
-    const [sr,sg,sb] = this._hex2rgb(scoreClr);
-    const [ar,ag,ab] = this._hex2rgb(aiClr);
-
     const reportId = String(Math.floor(Math.random() * 9e9) + 1e9);
-    const date     = new Date(r.timestamp || Date.now()).toLocaleString('en-US', {
-      year:'numeric', month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit'
+    const dateDisplay = new Date(r.timestamp || Date.now()).toLocaleString('en-GB', {
+      day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'
     });
+    
     const docName   = r.documentName || 'Pasted Text';
     const wordCount = r.stats?.wordCount || 0;
     const charCount = Math.round(wordCount * 5.2);
 
-    let y = this._drawHeader(doc, 'Originality Analysis Report', date, reportId);
+    const pct       = r.similarity?.plagiarismPercent || 0;
+    const hasRef    = !!(r.similarity && r.similarity.combined > 0);
+    const internetPct     = Math.min(100, Math.round(pct * 1.02));
+    const publicationsPct = Math.round((r.similarity?.cosine || 0) * 66);
+    const studentPct      = Math.round((r.lcs?.lcsSimilarity || 0) * 84);
 
-    y = this._drawMetaBar(doc, [
-      { label: 'Document', value: docName },
-      { label: 'Words', value: wordCount.toLocaleString() },
-      { label: 'Characters', value: charCount.toLocaleString() }
-    ], y);
-
-    y += 6;
-
-    /* ── Score + breakdown row ── */
-    // Large score box (left)
-    const boxH = 42, boxW = 52;
-    doc.setFillColor(248, 250, 252);
-    doc.setDrawColor(sr, sg, sb);
-    doc.setLineWidth(1);
-    doc.roundedRect(ML, y, boxW, boxH, 3, 3, 'FD');
-
-    // Top accent bar
-    doc.setFillColor(sr, sg, sb);
-    doc.roundedRect(ML, y, boxW, 4, 2, 2, 'F');
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(30);
-    doc.setTextColor(sr, sg, sb);
-    doc.text(`${pct}%`, ML + boxW / 2, y + 23, { align: 'center' });
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(6.5);
-    doc.setTextColor(100, 116, 139);
-    doc.text('SIMILARITY', ML + boxW / 2, y + 31, { align: 'center' });
-    doc.text('INDEX', ML + boxW / 2, y + 36, { align: 'center' });
-
-    // 4 mini-cards (right)
-    if (hasRef) {
-      const internetPct     = Math.min(100, Math.round(pct * 1.02));
-      const publicationsPct = Math.round((r.similarity?.cosine || 0) * 66);
-      const studentPct      = Math.round((r.lcs?.lcsSimilarity || 0) * 84);
-
-      const cards = [
-        { label: 'INTERNET',     pct: internetPct,     color: '#3b82f6' },
-        { label: 'PUBLICATIONS', pct: publicationsPct, color: '#10b981' },
-        { label: 'STUDENT WORK', pct: studentPct,      color: '#8b5cf6' },
-        { label: 'AI CONTENT',   pct: aiPct,           color: aiClr     }
-      ];
-
-      const gap  = 3;
-      const cardW = (CW - boxW - gap * (cards.length + 1)) / cards.length;
-
-      cards.forEach((card, i) => {
-        const cx = ML + boxW + gap + i * (cardW + gap);
-        const [cr,cg,cb] = this._hex2rgb(card.color);
-
-        doc.setFillColor(248, 250, 252);
-        doc.roundedRect(cx, y, cardW, boxH, 2, 2, 'F');
-
-        // top stripe
-        doc.setFillColor(cr, cg, cb);
-        doc.roundedRect(cx, y, cardW, 3, 1.5, 1.5, 'F');
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(19);
-        doc.setTextColor(cr, cg, cb);
-        doc.text(`${card.pct}%`, cx + cardW / 2, y + 22, { align: 'center' });
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(5.5);
-        doc.setTextColor(100, 116, 139);
-        doc.text(card.label, cx + cardW / 2, y + 31, { align: 'center' });
-      });
-    } else {
+    /* =======================================================
+       PAGE 1: COVER PAGE
+       ======================================================= */
+    let y = 90;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(26);
+    doc.setTextColor(51, 51, 51);
+    
+    const titleLines = doc.splitTextToSize(docName, CW - 20);
+    titleLines.forEach(line => {
+      doc.text(line, PW/2, y, { align: 'center' });
+      y += 11;
+    });
+    
+    y += 8;
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(13);
+    doc.setTextColor(100, 100, 100);
+    doc.text('by VerifyAI Originality Report', PW/2, y, { align: 'center' });
+    
+    y = PH - 60;
+    doc.setDrawColor(204, 204, 204);
+    doc.setLineWidth(0.3);
+    doc.line(ML, y, PW - ML, y);
+    
+    y += 8;
+    doc.setFontSize(9);
+    doc.setTextColor(51, 51, 51);
+    
+    const drawMeta = (label, val, yPos) => {
+      doc.setFont('helvetica', 'bold');
+      doc.text(`${label}:`, ML, yPos);
+      const w = doc.getTextWidth(`${label}: `);
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8.5);
-      doc.setTextColor(156, 163, 175);
-      doc.text('No reference text provided.', ML + boxW + 10, y + 18);
-      doc.text('Add reference for full comparison.', ML + boxW + 10, y + 25);
-    }
+      doc.text(String(val), ML + w, yPos);
+    };
+    
+    drawMeta('Submission date', dateDisplay, y);
+    drawMeta('Submission ID', reportId, y + 6);
+    drawMeta('File name', titleLines[0].slice(0, 50) + (titleLines[0].length > 50 ? '...' : ''), y + 12);
+    drawMeta('Word count', wordCount.toLocaleString(), y + 18);
+    drawMeta('Character count', charCount.toLocaleString(), y + 24);
 
-    y += boxH + 10;
+    /* =======================================================
+       PAGE 2: SCORE & SOURCES PAGE
+       ======================================================= */
+    doc.addPage();
+    y = 20;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(14);
+    doc.setTextColor(51, 51, 51);
+    const shortTitle = docName.length > 60 ? docName.slice(0, 57) + '...' : docName;
+    doc.text(shortTitle, ML, y);
+    
+    y += 5;
+    doc.setDrawColor(150, 150, 150);
+    doc.setLineWidth(0.5);
+    doc.line(ML, y, PW - ML, y);
+    
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(220, 38, 38);
+    doc.text('ORIGINALITY REPORT', ML, y);
+    
+    y += 3;
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.2);
+    doc.line(ML, y, PW - ML, y);
+    
+    y += 20;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(45);
+    doc.setTextColor(220, 38, 38);
+    doc.text(`${pct}`, ML, y);
+    let valW = doc.getTextWidth(`${pct}`);
+    doc.setFontSize(20);
+    doc.text('%', ML + valW + 1, y - 10);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(85, 85, 85);
+    doc.text('SIMILARITY INDEX', ML, y + 8);
+    
+    const c1 = ML + 55;
+    doc.setFontSize(35);
+    doc.setTextColor(51, 51, 51);
+    doc.text(`${internetPct}`, c1, y - 2);
+    valW = doc.getTextWidth(`${internetPct}`);
+    doc.setFontSize(15);
+    doc.text('%', c1 + valW + 1, y - 12);
+    doc.setFontSize(9);
+    doc.setTextColor(85, 85, 85);
+    doc.text('INTERNET SOURCES', c1, y + 8);
+    
+    const c2 = c1 + 55;
+    doc.setFontSize(35);
+    doc.setTextColor(51, 51, 51);
+    doc.text(`${publicationsPct}`, c2, y - 2);
+    valW = doc.getTextWidth(`${publicationsPct}`);
+    doc.setFontSize(15);
+    doc.text('%', c2 + valW + 1, y - 12);
+    doc.setFontSize(9);
+    doc.setTextColor(85, 85, 85);
+    doc.text('PUBLICATIONS', c2, y + 8);
+    
+    const c3 = c2 + 45;
+    doc.setFontSize(35);
+    doc.setTextColor(51, 51, 51);
+    doc.text(`${studentPct}`, c3, y - 2);
+    valW = doc.getTextWidth(`${studentPct}`);
+    doc.setFontSize(15);
+    doc.text('%', c3 + valW + 1, y - 12);
+    doc.setFontSize(9);
+    doc.setTextColor(85, 85, 85);
+    doc.text('STUDENT PAPERS', c3, y + 8);
 
-    /* ── Algorithm Breakdown ── */
-    if (hasRef) {
-      y = this._drawSection(doc, 'Detection Algorithms', y);
-      y = this._drawBar(doc, 'TF-IDF Cosine Similarity',          Math.round((r.similarity?.cosine||0)*100),         '#4f46e5', y);
-      y = this._drawBar(doc, 'Bigram Jaccard Index',               Math.round((r.similarity?.bigramJaccard||0)*100),  '#0ea5e9', y);
-      y = this._drawBar(doc, 'Trigram Jaccard Index',              Math.round((r.similarity?.trigramJaccard||0)*100), '#0ea5e9', y);
-      y = this._drawBar(doc, 'Rabin-Karp Fingerprint (Winnowing)', Math.round((r.fingerprint?.jaccard||0)*100),       '#f59e0b', y);
-      y = this._drawBar(doc, 'Longest Common Subsequence (LCS)',   Math.round((r.lcs?.lcsSimilarity||0)*100),         '#10b981', y);
-      y += 4;
-    }
-
-    /* ── Sources ── */
+    y += 15;
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.5);
+    doc.line(ML, y, PW - ML, y);
+    
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(220, 38, 38);
+    doc.text('PRIMARY SOURCES', ML, y);
+    
+    y += 3;
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.2);
+    doc.line(ML, y, PW - ML, y);
+    
+    y += 8;
+    
     const sources = this._getSources(r, hasRef);
-    if (sources.length) {
-      if (y > PH - 60) { doc.addPage(); y = 20; }
-      y = this._drawSection(doc, 'Primary Sources', y);
-      const srcColors = ['#ef4444','#3b82f6','#10b981','#f59e0b','#8b5cf6'];
-
+    const srcColors = ['#ef4444','#d946ef','#8b5cf6','#06b6d4','#22c55e'];
+    
+    if (sources.length > 0) {
       sources.forEach((src, i) => {
         if (y > PH - MB - 16) { doc.addPage(); y = 20; }
         const [cr,cg,cb] = this._hex2rgb(srcColors[i % srcColors.length]);
-
+        
         doc.setFillColor(cr, cg, cb);
-        doc.circle(ML + 3.5, y + 4, 3.5, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(7);
-        doc.setTextColor(255,255,255);
-        doc.text(String(i+1), ML + 3.5, y + 5.5, { align: 'center' });
-
+        doc.rect(ML, y - 6, 8, 8, 'F');
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        doc.setTextColor(17, 24, 39);
-        const urlTxt = src.url.length > 82 ? src.url.slice(0,79) + '...' : src.url;
-        doc.text(urlTxt, ML + 10, y + 4);
-
-        doc.setFontSize(7);
-        doc.setTextColor(107, 114, 128);
-        doc.text(src.type || 'Web', ML + 10, y + 9);
-
-        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(255, 255, 255);
+        doc.text(String(i+1), ML + 4, y + 1.2, { align: 'center' });
+        
+        doc.setFont('helvetica', 'normal');
         doc.setFontSize(12);
         doc.setTextColor(cr, cg, cb);
-        doc.text(`${src.pct || 0}%`, ML + CW, y + 6, { align: 'right' });
-
-        doc.setDrawColor(243, 244, 246);
+        const urlTxt = src.url.length > 60 ? src.url.slice(0,57) + '...' : src.url;
+        doc.text(urlTxt, ML + 12, y);
+        
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text('Internet Source', ML + 12, y + 5);
+        
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(22);
+        doc.setTextColor(51, 51, 51);
+        doc.text(`${src.pct || 0}`, ML + CW - 10, y + 4, { align: 'right' });
+        const vw = doc.getTextWidth(`${src.pct || 0}`);
+        doc.setFontSize(11);
+        doc.text('%', ML + CW - 10 + 1, y + 4 - 6);
+        
+        y += 11;
+        doc.setDrawColor(220, 220, 220);
         doc.setLineWidth(0.2);
-        doc.line(ML, y + 13, ML + CW, y + 13);
-        y += 15;
+        doc.line(ML, y, PW - ML, y);
+        y += 7;
       });
-      y += 4;
-    }
-
-    /* ── AI Detection ── */
-    if (r.aiDetection) {
-      if (y > PH - 75) { doc.addPage(); y = 20; }
-      y = this._drawSection(doc, 'AI Content Detection', y);
-
-      doc.setFillColor(255, 251, 235);
-      doc.setDrawColor(253, 230, 138);
-      doc.setLineWidth(0.3);
-      doc.roundedRect(ML, y, CW, 24, 3, 3, 'FD');
-
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(28);
-      doc.setTextColor(ar, ag, ab);
-      doc.text(`${aiPct}%`, ML + 22, y + 17, { align: 'center' });
-
-      doc.setFont('helvetica', 'bold');
+    } else {
+      doc.setFont('helvetica', 'italic');
       doc.setFontSize(10);
-      doc.setTextColor(17, 24, 39);
-      doc.text(`${r.aiDetection.verdict || ''}`, ML + 46, y + 9);
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.setTextColor(107, 114, 128);
-      const confLines = doc.splitTextToSize(r.aiDetection.confidence || '', CW - 38);
-      doc.text(confLines.slice(0,2), ML + 46, y + 15);
-
-      y += 30;
-
-      const sigs = r.aiDetection.signals || {};
-      y = this._drawBar(doc, 'Sentence Length Uniformity', Math.round((sigs.sentenceLengthUniformity||0)*100), '#f59e0b', y);
-      y = this._drawBar(doc, 'Transition Word Density',    Math.round((sigs.transitionWordDensity||0)*100),    '#f59e0b', y);
-      y = this._drawBar(doc, 'Long Word Ratio',            Math.round((sigs.longWordRatio||0)*100),            '#f59e0b', y);
-      y = this._drawBar(doc, 'Structural Repetition',      Math.round((sigs.structuralRepetition||0)*100),     '#f59e0b', y);
-      y = this._drawBar(doc, 'Perplexity Proxy',           Math.round((sigs.perplexityProxy||0)*100),         '#4f46e5', y);
+      doc.setTextColor(150, 150, 150);
+      doc.text('No matching sources found.', ML, y + 10);
     }
 
-    /* ── Document text page ── */
+    /* =======================================================
+       PAGE 3+: HIGHLIGHTED DOCUMENT TEXT
+       ======================================================= */
     const textInput = document.getElementById('single-text-area')?.value?.trim() || '';
-    if (hasRef && textInput.length > 50) {
+    if (textInput.length > 10) {
       doc.addPage();
       y = 20;
-      y = this._drawSection(doc, 'Document Text', y);
+      
+      const maxChars = 20000;
+      const displayText = textInput.length > maxChars ? textInput.slice(0, maxChars) + '\n\n[Text truncated...]' : textInput;
+      
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      const lineHeight = 5.5;
+      const spaceWidth = doc.getTextWidth(' ');
+      
+      const plagSentences = new Set();
+      if (r.sentenceMatches && r.sentenceMatches.length > 0) {
+        r.sentenceMatches.forEach(m => plagSentences.add(m.sentenceA.trim().toLowerCase()));
+      }
+      
+      const paragraphs = displayText.split('\n');
+      let curX = ML;
+      
+      const drawWord = (word, isPlag) => {
+          if (!word) return;
+          const w = doc.getTextWidth(word);
+          if (curX + w > PW - ML) {
+              curX = ML;
+              y += lineHeight;
+              if (y > PH - MB - 10) { doc.addPage(); y = 20; }
+          }
+          
+          if (isPlag) {
+              doc.setFillColor(254, 226, 226); // red-100
+              doc.rect(curX - 0.5, y - 4, w + spaceWidth + 0.5, lineHeight + 0.5, 'F');
+              doc.setTextColor(153, 27, 27); // red-800
+          } else {
+              doc.setTextColor(51, 51, 51);
+          }
+          doc.text(word, curX, y);
+          curX += w + spaceWidth;
+      };
 
-      doc.setFont('times', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(55, 65, 81);
-
-      const maxChars = 8000;
-      const displayText = textInput.length > maxChars
-        ? textInput.slice(0, maxChars) + '\n\n[Text truncated — see full document]'
-        : textInput;
-
-      const lines = doc.splitTextToSize(displayText, CW);
-      lines.forEach(line => {
-        if (y > PH - MB - 8) { doc.addPage(); y = 20; }
-        doc.text(line, ML, y);
-        y += 4.5;
+      paragraphs.forEach(para => {
+        if (!para.trim()) { 
+           curX = ML; y += lineHeight; 
+           if (y > PH - MB - 10) { doc.addPage(); y = 20; }
+           return; 
+        }
+        
+        const sents = para.match(/[^.!?]+[.!?]+/g) || [para];
+        
+        sents.forEach(sent => {
+           const cleanSent = sent.trim().toLowerCase();
+           let isPlag = false;
+           
+           if (hasRef) {
+               for (const pSent of plagSentences) {
+                   if (cleanSent.includes(pSent) || pSent.includes(cleanSent)) {
+                       isPlag = true; break;
+                   }
+               }
+           }
+           
+           const words = sent.split(/\s+/);
+           words.forEach(w => drawWord(w, isPlag));
+        });
+        
+        curX = ML;
+        y += lineHeight + 2;
       });
     }
 
