@@ -1820,6 +1820,8 @@ class VerifyAI {
     if (overlay) {
       if (state) {
         this.analysisStartTime = Date.now();
+        this.currentPct = 0;
+        this.estTotal = 0;
         // Reset progress
         const fill = document.getElementById('loading-progress-fill');
         const text = document.getElementById('loading-progress-text');
@@ -1830,8 +1832,12 @@ class VerifyAI {
         overlay.querySelector('.loading-text').textContent = 'Checking, please wait...';
         overlay.querySelector('.loading-subtext').textContent = 'Initialising analysis...';
         overlay.classList.add('active');
+        
+        if (this.liveTimerInterval) clearInterval(this.liveTimerInterval);
+        this.liveTimerInterval = setInterval(() => this._updateTimeRemaining(), 1000);
       } else {
         overlay.classList.remove('active');
+        if (this.liveTimerInterval) clearInterval(this.liveTimerInterval);
       }
     }
 
@@ -1847,29 +1853,42 @@ class VerifyAI {
     }
   }
 
+  _updateTimeRemaining() {
+    const timeText = document.getElementById('loading-time-remaining');
+    if (!timeText || !this.analysisStartTime || this.currentPct <= 0) return;
+    
+    const elapsed = Date.now() - this.analysisStartTime;
+    if (elapsed > 500 && this.currentPct < 100) {
+        const currentEstTotal = (elapsed / this.currentPct) * 100;
+        if (!this.estTotal) this.estTotal = currentEstTotal;
+        else this.estTotal = (this.estTotal * 0.8) + (currentEstTotal * 0.2);
+        
+        const remaining = Math.max(0, this.estTotal - elapsed);
+        const secs = Math.round(remaining / 1000);
+        
+        const m = Math.floor(secs / 60);
+        const s = secs % 60;
+        const timeStr = m > 0 ? `${m}m ${s}s` : `${s}s`;
+        
+        timeText.textContent = `Estimated time remaining: ${timeStr}`;
+    } else if (this.currentPct >= 100) {
+        timeText.textContent = 'Finishing up...';
+    }
+  }
+
   _setOverlayProgress(pct, subtext) {
     const fill = document.getElementById('loading-progress-fill');
     const text = document.getElementById('loading-progress-text');
     const sub  = document.querySelector('#loading-overlay .loading-subtext');
-    const timeText = document.getElementById('loading-time-remaining');
-    const pctVal = parseFloat(pct);
-    const pctStr = pctVal.toFixed(2);
+    
+    this.currentPct = parseFloat(pct);
+    const pctStr = this.currentPct.toFixed(2);
     
     if (fill) fill.style.width = pctStr + '%';
     if (text) text.textContent = pctStr + '%';
     if (sub && subtext) sub.textContent = subtext;
 
-    if (timeText && this.analysisStartTime && pctVal > 0) {
-        const elapsed = Date.now() - this.analysisStartTime;
-        if (elapsed > 500 && pctVal < 100) {
-            const estTotal = (elapsed / pctVal) * 100;
-            const remaining = Math.max(0, estTotal - elapsed);
-            const secs = Math.round(remaining / 1000);
-            timeText.textContent = `Estimated time remaining: ${secs}s`;
-        } else if (pctVal >= 100) {
-            timeText.textContent = 'Finishing up...';
-        }
-    }
+    this._updateTimeRemaining();
   }
 
   showProgress(id, pct) {
