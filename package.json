@@ -1,0 +1,24 @@
+{
+  "name": "plagiarism-checker",
+  "version": "1.0.0",
+  "description": "VerifyAI is a world-class, free, and open-source plagiarism checker and AI content detector that runs entirely in your browser.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rlvidanapathirana/VerifyAI.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rlvidanapathirana/VerifyAI/issues"
+  },
+  "homepage": "https://github.com/rlvidanapathirana/VerifyAI#readme",
+  "dependencies": {
+    "jsdom": "^29.1.1"
+  }
+}
