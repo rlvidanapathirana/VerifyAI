@@ -256,28 +256,42 @@ class ExportManager {
     const studentPct      = Math.round((r.lcs?.lcsSimilarity || 0) * 84);
 
     /* =======================================================
-       PAGE 1: COVER PAGE
+       PAGE 1: COVER PAGE (MODERN REDESIGN)
        ======================================================= */
-    let y = 90;
+    // Draw Premium Dark Banner
+    doc.setFillColor(15, 23, 42); // slate-900
+    doc.rect(0, 0, PW, 160, 'F');
     
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(24);
-    doc.setTextColor(51, 51, 51);
+    // Sub-brand label
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(56, 189, 248); // sky-400
+    doc.text('VERIFYAI ORIGINALITY REPORT', ML, 40);
     
-    // Force split if a single word is insanely long or has weird spaces
-    const titleLines = doc.splitTextToSize(docName, CW - 40).map(l => l.trim());
+    // Document Title (Left aligned prevents centering bugs with weird spacing)
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(26);
+    doc.setTextColor(255, 255, 255);
+    
+    // We forcefully remove spaces between every letter if it exists by a regex?
+    // Actually, just trim and left align is enough.
+    let titleLines = doc.splitTextToSize(docName, CW);
+    let y = 60;
+    
     titleLines.forEach(line => {
-      doc.text(line, PW/2, y, { align: 'center' });
-      y += 11;
+      if (y < 140) {
+          doc.text(line.trim(), ML, y);
+          y += 12;
+      }
     });
     
-    y += 8;
     doc.setFont('helvetica', 'italic');
-    doc.setFontSize(13);
-    doc.setTextColor(100, 100, 100);
-    doc.text('by VerifyAI Originality Report', PW/2, y, { align: 'center' });
+    doc.setFontSize(12);
+    doc.setTextColor(148, 163, 184); // slate-400
+    doc.text('A comprehensive analysis of text originality and AI detection.', ML, y + 10);
     
-    y = PH - 60;
+    // Metadata block at the bottom
+    y = PH - 70;
     doc.setDrawColor(204, 204, 204);
     doc.setLineWidth(0.3);
     doc.line(ML, y, PW - ML, y);
