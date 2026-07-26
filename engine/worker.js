@@ -33,7 +33,7 @@ self.onmessage = function(e) {
         self.postMessage({ type: 'progress', pct: 90, msg: 'Matching individual sentences...' });
         
         // Distribution of internet score
-        if (internetText && internetText.length > 30) {
+        if (finalSources && finalSources.length > 0) {
           let rem = similarity.plagiarismPercent || 0;
           finalSources = finalSources.map((s, si) => {
             const score = si === finalSources.length - 1 ? rem : Math.floor(rem * (0.35 + Math.random() * 0.3));
@@ -54,6 +54,7 @@ self.onmessage = function(e) {
     } else if (action === 'processDoc') {
       // For bulk processing individual docs
       const { name, text, internetText, realSources } = payload;
+      const finalTextB = internetText || '';
       
       const stats = nlp.getTextStats(text);
       const aiDetection = aiDetector.analyze(text);
@@ -61,16 +62,18 @@ self.onmessage = function(e) {
       let similarity = { plagiarismPercent: 0, matchingPhrases: [] };
       let actualSources = [];
       
-      if (internetText && internetText.length > 30) {
-        similarity = nlp.analyzeSimilarity(text, internetText);
+      if (finalTextB && finalTextB.length > 30) {
+        similarity = nlp.analyzeSimilarity(text, finalTextB);
         actualSources = realSources || [];
         
-        let rem = similarity.plagiarismPercent || 0;
-        actualSources = actualSources.map((s, si) => {
-          const score = si === actualSources.length - 1 ? rem : Math.floor(rem * (0.35 + Math.random() * 0.3));
-          rem = Math.max(rem - score, 0);
-          return { ...s, score: Math.max(score, 0) };
-        }).filter(s => s.score > 0).sort((a, b) => b.score - a.score);
+        if (actualSources && actualSources.length > 0) {
+          let rem = similarity.plagiarismPercent || 0;
+          actualSources = actualSources.map((s, si) => {
+            const score = si === actualSources.length - 1 ? rem : Math.floor(rem * (0.35 + Math.random() * 0.3));
+            rem = Math.max(rem - score, 0);
+            return { ...s, score: Math.max(score, 0) };
+          }).filter(s => s.score > 0).sort((a, b) => b.score - a.score);
+        }
       }
       
       result = {
