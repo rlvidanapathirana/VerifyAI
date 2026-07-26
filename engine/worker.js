@@ -36,9 +36,14 @@ self.onmessage = function(e) {
         if (finalSources && finalSources.length > 0) {
           let rem = similarity.plagiarismPercent || 0;
           finalSources = finalSources.map((s, si) => {
-            const score = si === finalSources.length - 1 ? rem : Math.floor(rem * (0.35 + Math.random() * 0.3));
-            rem = Math.max(rem - score, 0);
-            return { ...s, score: Math.max(score, 0) };
+            let score = 0;
+            if (rem > 0) {
+                score = si === finalSources.length - 1 ? rem : Math.floor(rem * (0.2 + Math.random() * 0.2)) + 1;
+                rem = Math.max(rem - score, 0);
+            } else {
+                score = 0;
+            }
+            return { ...s, score };
           }).filter(s => s.score > 0).sort((a, b) => b.score - a.score);
         }
       }
@@ -61,26 +66,35 @@ self.onmessage = function(e) {
       
       let similarity = { plagiarismPercent: 0, matchingPhrases: [] };
       let actualSources = [];
+      let sentenceMatches = [];
       
       if (finalTextB && finalTextB.length > 30) {
         similarity = nlp.analyzeSimilarity(text, finalTextB);
+        sentenceMatches = nlp.getSentenceMatches(text, finalTextB);
         actualSources = realSources || [];
         
         if (actualSources && actualSources.length > 0) {
           let rem = similarity.plagiarismPercent || 0;
           actualSources = actualSources.map((s, si) => {
-            const score = si === actualSources.length - 1 ? rem : Math.floor(rem * (0.35 + Math.random() * 0.3));
-            rem = Math.max(rem - score, 0);
-            return { ...s, score: Math.max(score, 0) };
+            let score = 0;
+            if (rem > 0) {
+                score = si === actualSources.length - 1 ? rem : Math.floor(rem * (0.2 + Math.random() * 0.2)) + 1;
+                rem = Math.max(rem - score, 0);
+            } else {
+                score = 0;
+            }
+            return { ...s, score };
           }).filter(s => s.score > 0).sort((a, b) => b.score - a.score);
         }
       }
       
       result = {
         name,
+        text,
         stats,
         aiDetection,
         similarity,
+        sentenceMatches,
         realSources: actualSources
       };
       

@@ -265,7 +265,7 @@ class ExportManager {
     doc.setTextColor(51, 51, 51);
     
     // Force split if a single word is insanely long or has weird spaces
-    const titleLines = doc.splitTextToSize(docName, CW - 40);
+    const titleLines = doc.splitTextToSize(docName, CW - 40).map(l => l.trim());
     titleLines.forEach(line => {
       doc.text(line, PW/2, y, { align: 'center' });
       y += 11;
@@ -437,12 +437,60 @@ class ExportManager {
       doc.setFontSize(10);
       doc.setTextColor(150, 150, 150);
       doc.text('No matching sources found.', ML, y + 10);
+      y += 20;
     }
+
+    /* =======================================================
+       PAGE 2.5: AI CONTENT DETECTION
+       ======================================================= */
+    if (y > PH - 100) { doc.addPage(); y = 20; }
+    y += 10;
+    
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(51, 51, 51);
+    doc.text('AI CONTENT DETECTION', ML, y);
+    
+    y += 15;
+    
+    const aiConfidence = r.aiDetection?.confidence || 0;
+    const aiScore = r.aiDetection?.aiScore || 0;
+    const humanScore = 100 - aiScore;
+    
+    let prediction = 'Original Content';
+    if (aiScore > 70) prediction = 'Likely AI-Generated Content';
+    else if (aiScore > 30) prediction = 'Mixed or Slightly Modified Content';
+    
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(28);
+    doc.setTextColor(51, 51, 51);
+    doc.text(`${humanScore}%`, ML, y);
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    doc.text('Likely Human-Written', ML, y + 6);
+    
+    doc.setFontSize(11);
+    doc.setTextColor(51, 51, 51);
+    doc.text(`Prediction: ${prediction}`, ML + 80, y - 6);
+    
+    const confLevel = aiConfidence > 80 ? 'High' : (aiConfidence > 50 ? 'Medium' : 'Low');
+    doc.text(`Confidence Level: ${confLevel} (${aiConfidence}%)`, ML + 80, y);
+    
+    y += 15;
+    doc.setDrawColor(220, 220, 220);
+    doc.setLineWidth(0.5);
+    doc.line(ML, y, PW - ML, y);
+    y += 10;
 
     /* =======================================================
        PAGE 3+: HIGHLIGHTED DOCUMENT TEXT
        ======================================================= */
-    const textInput = document.getElementById('single-text-area')?.value?.trim() || '';
+    let textInput = r.text || '';
+    if (!textInput) {
+       textInput = document.getElementById('single-text-area')?.value?.trim() || '';
+    }
     if (textInput.length > 10) {
       doc.addPage();
       y = 20;
