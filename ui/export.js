@@ -242,7 +242,10 @@ class ExportManager {
       day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'
     });
     
-    const docName   = r.documentName || 'Pasted Text';
+    let cleanDocName = (r.documentName || 'Pasted Text').replace(/[\r\n\t\u00A0]/g, ' ').trim();
+    if (cleanDocName.length > 120) cleanDocName = cleanDocName.slice(0, 117) + '...';
+    
+    const docName   = cleanDocName;
     const wordCount = r.stats?.wordCount || 0;
     const charCount = Math.round(wordCount * 5.2);
 
@@ -258,10 +261,11 @@ class ExportManager {
     let y = 90;
     
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(26);
+    doc.setFontSize(24);
     doc.setTextColor(51, 51, 51);
     
-    const titleLines = doc.splitTextToSize(docName, CW - 20);
+    // Force split if a single word is insanely long or has weird spaces
+    const titleLines = doc.splitTextToSize(docName, CW - 40);
     titleLines.forEach(line => {
       doc.text(line, PW/2, y, { align: 'center' });
       y += 11;
@@ -453,7 +457,7 @@ class ExportManager {
       
       const plagSentences = new Set();
       if (r.sentenceMatches && r.sentenceMatches.length > 0) {
-        r.sentenceMatches.forEach(m => plagSentences.add(m.sentenceA.trim().toLowerCase()));
+        r.sentenceMatches.forEach(m => plagSentences.add(m.sentenceA.replace(/[\r\n\t\u00A0]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase()));
       }
       
       const paragraphs = displayText.split('\n');
@@ -486,16 +490,17 @@ class ExportManager {
            return; 
         }
         
-        const sents = para.match(/[^.!?]+[.!?]+/g) || [para];
+        const sents = para.match(/[^.!?\n]+(?:[.!?]+|$)/g) || [para];
         
         sents.forEach(sent => {
-           const cleanSent = sent.trim().toLowerCase();
+           const cleanSent = sent.replace(/[\r\n\t\u00A0]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
            let isPlag = false;
            
-           if (hasRef) {
+           if (hasRef && cleanSent.length > 5) {
                for (const pSent of plagSentences) {
-                   if (cleanSent.includes(pSent) || pSent.includes(cleanSent)) {
-                       isPlag = true; break;
+                   if (pSent.includes(cleanSent) || cleanSent.includes(pSent)) {
+                       isPlag = true; 
+                       break;
                    }
                }
            }
