@@ -258,6 +258,7 @@ class VerifyAI {
     }
     if (dropZone) {
       dropZone.querySelector('.drop-label').textContent = `✓ ${file.name} loaded`;
+      dropZone.dataset.filename = file.name;
       dropZone.classList.add('file-loaded');
     }
     this.showToast(`${file.name} loaded successfully!`, 'success');
@@ -314,7 +315,7 @@ class VerifyAI {
 
       const result = {
         type: 'single',
-        documentName: document.getElementById('single-drop-zone')?.querySelector('.drop-label')?.textContent || 'Pasted Text',
+        documentName: document.getElementById('single-drop-zone')?.dataset.filename || 'Pasted Text',
         rawText: textA,
         stats: workerResult.stats,
         similarity: workerResult.similarity,
@@ -1822,6 +1823,7 @@ class VerifyAI {
         this.analysisStartTime = Date.now();
         this.currentPct = 0;
         this.estTotal = 0;
+        this.lastPctForTimeCalc = 0;
         // Reset progress
         const fill = document.getElementById('loading-progress-fill');
         const text = document.getElementById('loading-progress-text');
@@ -1859,9 +1861,12 @@ class VerifyAI {
     
     const elapsed = Date.now() - this.analysisStartTime;
     if (elapsed > 500 && this.currentPct < 100) {
-        const currentEstTotal = (elapsed / this.currentPct) * 100;
-        if (!this.estTotal) this.estTotal = currentEstTotal;
-        else this.estTotal = (this.estTotal * 0.8) + (currentEstTotal * 0.2);
+        if (!this.lastPctForTimeCalc || this.currentPct > this.lastPctForTimeCalc) {
+            const currentEstTotal = (elapsed / this.currentPct) * 100;
+            if (!this.estTotal) this.estTotal = currentEstTotal;
+            else this.estTotal = (this.estTotal * 0.7) + (currentEstTotal * 0.3);
+            this.lastPctForTimeCalc = this.currentPct;
+        }
         
         const remaining = Math.max(0, this.estTotal - elapsed);
         const secs = Math.round(remaining / 1000);

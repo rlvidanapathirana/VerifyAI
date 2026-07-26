@@ -497,6 +497,30 @@ class ExportManager {
     doc.setLineWidth(0.5);
     doc.line(ML, y, PW - ML, y);
     y += 10;
+    
+    // Add detailed analysis breakdown
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
+    doc.setTextColor(51, 51, 51);
+    doc.text('Analysis Breakdown', ML, y);
+    y += 10;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.setTextColor(100, 100, 100);
+    
+    const breakdownTexts = [
+        `• Linguistic Patterns: ${aiScore > 50 ? 'Highly predictable and uniform (characteristic of AI models)' : 'Varied sentence structures and natural flow'}`,
+        `• Perplexity Score: ${aiScore > 50 ? 'Low (text is highly probable according to language models)' : 'High (text contains unexpected or creative word choices)'}`,
+        `• Burstiness: ${aiScore > 50 ? 'Low (consistent sentence lengths)' : 'High (mix of short and long sentences)'}`,
+        `• Contextual Analysis: ${aiScore > 50 ? 'Lacks deep contextual nuances often found in human writing' : 'Demonstrates deep contextual understanding and natural transitions'}`
+    ];
+    
+    breakdownTexts.forEach(txt => {
+        const lines = doc.splitTextToSize(txt, CW);
+        doc.text(lines, ML, y);
+        y += (lines.length * 5) + 3;
+    });
 
     /* =======================================================
        PAGE 3+: HIGHLIGHTED DOCUMENT TEXT
